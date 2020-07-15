@@ -1,5 +1,5 @@
 import { StackScreenProps } from '@react-navigation/stack';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Input, Button } from 'react-native-elements';
 import Toast from 'react-native-root-toast';
@@ -16,6 +16,37 @@ export default function LoginScreen({
   const [email, onChangeEmail] = useState('');
   const [captcha, onChangeCaptcha] = useState('');
   const [captchaCoolDown, setCaptchaCoolDown] = useState(true);
+  const sendCaptcha = useCallback(async () => {
+    const res = await fetch(
+      `https://engine.mebtte.com/1/verify_code?type=signin&email=${email}`
+    ).then((res) => res.json());
+    if (res.code !== 0) Toast.show(res.message);
+    else {
+      Toast.show('验证码已发送');
+      setCaptchaCoolDown(false);
+      setTimeout(() => {
+        setCaptchaCoolDown(true);
+      }, 60 * 1000);
+    }
+  }, []);
+  const login = useCallback(async () => {
+    const res = await fetch('https://engine.mebtte.com/1/user/signin', {
+      body: JSON.stringify({
+        email,
+        verify_code: captcha,
+      }),
+      headers: {
+        'content-type': 'application/json',
+      },
+      method: 'POST',
+    }).then((res) => res.json());
+    if (res.code !== 0) Toast.show(res.message);
+    else {
+      Toast.show('登录成功');
+      await AsyncStorage.setItem('user_info', res.data);
+      navigation.replace('Root');
+    }
+  }, []);
   return (
     <View style={styles.container}>
       <Input
@@ -39,19 +70,7 @@ export default function LoginScreen({
           containerStyle={{ width: '40%' }}
           buttonStyle={styles.button}
           disabled={!emailRegExp.test(email) || !captchaCoolDown}
-          onPress={async () => {
-            const res = await fetch(
-              `https://engine.mebtte.com/1/verify_code?type=signin&email=${email}`
-            ).then((res) => res.json());
-            if (res.code !== 0) Toast.show(res.message);
-            else {
-              Toast.show('验证码已发送');
-              setCaptchaCoolDown(false);
-              setTimeout(() => {
-                setCaptchaCoolDown(true);
-              }, 60 * 1000);
-            }
-          }}
+          onPress={sendCaptcha}
         ></Button>
       </View>
       <Button
@@ -59,24 +78,7 @@ export default function LoginScreen({
         containerStyle={{ width: '100%' }}
         buttonStyle={styles.button}
         disabled={!emailRegExp.test(email) || !captchaRegExp.test(captcha)}
-        onPress={async () => {
-          const res = await fetch('https://engine.mebtte.com/1/user/signin', {
-            body: JSON.stringify({
-              email,
-              verify_code: captcha,
-            }),
-            headers: {
-              'content-type': 'application/json',
-            },
-            method: 'POST'
-          }).then((res) => res.json());
-          if (res.code !== 0) Toast.show(res.message);
-          else {
-            Toast.show('登录成功');
-            await AsyncStorage.setItem('user_info', res.data);
-            navigation.replace('Root');
-          }
-        }}
+        onPress={login}
       ></Button>
     </View>
   );
