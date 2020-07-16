@@ -6,20 +6,6 @@ export default {
     screens: {
       Login: 'login',
       Main: 'main',
-      Root: {
-        screens: {
-          TabOne: {
-            screens: {
-              TabOneScreen: 'one',
-            },
-          },
-          TabTwo: {
-            screens: {
-              TabTwoScreen: 'two',
-            },
-          },
-        },
-      },
       NotFound: '*',
     },
   },
