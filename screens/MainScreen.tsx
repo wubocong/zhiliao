@@ -1,16 +1,22 @@
 import { StackScreenProps } from '@react-navigation/stack';
 import * as React from 'react';
 import { StyleSheet, View } from 'react-native';
+import { Tab, TabBar } from '@ui-kitten/components';
 
-import BottomBar from '../components/BottomBar';
+import PlayerBottomBar from '../components/PlayerBottomBar';
 import { RootStackParamList } from '../types';
 
 export default function MainScreen({
   navigation,
 }: StackScreenProps<RootStackParamList, 'Main'>) {
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
   return (
     <View style={styles.container}>
-      <BottomBar />
+      <TabBar selectedIndex={selectedIndex} onSelect={setSelectedIndex}>
+        <Tab title="我的"></Tab>
+        <Tab title="发现" />
+      </TabBar>
+      <PlayerBottomBar />
     </View>
   );
 }
@@ -21,6 +27,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    paddingTop: 20,
+    paddingBottom: 20,
   },
 });

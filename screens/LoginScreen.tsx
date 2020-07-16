@@ -1,9 +1,10 @@
 import { StackScreenProps } from '@react-navigation/stack';
 import React, { useState, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Input, Button } from 'react-native-elements';
+import { Button, Layout, Input } from '@ui-kitten/components';
 import Toast from 'react-native-root-toast';
 import AsyncStorage from '@react-native-community/async-storage';
+import { Feather } from '@expo/vector-icons';
 
 import { RootStackParamList } from '../types';
 
@@ -28,7 +29,7 @@ export default function LoginScreen({
         setCaptchaCoolDown(true);
       }, 60 * 1000);
     }
-  }, []);
+  }, [email]);
   const login = useCallback(async () => {
     const res = await fetch('https://engine.mebtte.com/1/user/signin', {
       body: JSON.stringify({
@@ -46,48 +47,55 @@ export default function LoginScreen({
       await AsyncStorage.setItem('user_info', res.data);
       navigation.replace('Root');
     }
-  }, []);
+  }, [email, captcha]);
   return (
-    <View style={styles.container}>
+    <Layout style={styles.container} level="1">
       <Input
+        style={{ width: '100%' }}
         placeholder="邮箱"
-        leftIcon={{ type: 'font-awesome', name: 'envelope' }}
+        accessoryLeft={() => <Feather name="mail" />}
         onChangeText={onChangeEmail}
         value={email}
       />
       <View style={{ width: '100%', flexDirection: 'row' }}>
         <Input
-          inputStyle={{ width: '100%' }}
-          containerStyle={{ width: '60%' }}
+          style={{ width: '60%' }}
           placeholder="验证码"
-          leftIcon={{ type: 'font-awesome', name: 'key' }}
+          accessoryLeft={() => <Feather name="key" />}
           maxLength={6}
           onChangeText={onChangeCaptcha}
           value={captcha}
         />
         <Button
-          title={captchaCoolDown ? '发送验证码' : '等待60秒'}
-          containerStyle={{ width: '40%' }}
-          buttonStyle={styles.button}
+          style={[{ width: '40%' }]}
           disabled={!emailRegExp.test(email) || !captchaCoolDown}
           onPress={sendCaptcha}
-        ></Button>
+        >
+          {captchaCoolDown ? '发送验证码' : '等待60秒'}
+        </Button>
       </View>
       <Button
-        title="登录"
-        containerStyle={{ width: '100%' }}
-        buttonStyle={styles.button}
+        style={[{ width: '100%' }]}
         disabled={!emailRegExp.test(email) || !captchaRegExp.test(captcha)}
         onPress={login}
-      ></Button>
-    </View>
+      >
+        登录
+      </Button>
+      <Button
+        style={[{ width: '100%' }]}
+        onPress={() => {
+          navigation.replace('Main');
+        }}
+      >
+        进入主页
+      </Button>
+    </Layout>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
