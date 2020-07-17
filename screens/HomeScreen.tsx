@@ -1,33 +1,27 @@
 import { StackScreenProps } from '@react-navigation/stack';
 import * as React from 'react';
 import { StyleSheet, View, Dimensions } from 'react-native';
-import { Tab, TabBar } from '@ui-kitten/components';
+import { Tab, TabBar, Layout } from '@ui-kitten/components';
 import { Audio } from 'expo-av';
 
 import PlayerBottomBar from '../components/PlayerBottomBar';
-import { RootStackParamList } from '../types';
+import { MainStackParamList, RootStackParamList } from '../types';
 
 const LOOPING_TYPE_ALL = 0;
 const LOOPING_TYPE_ONE = 1;
-const { width: DEVICE_WIDTH, height: DEVICE_HEIGHT } = Dimensions.get('window');
-const BACKGROUND_COLOR = '#FFF8ED';
-const DISABLED_OPACITY = 0.5;
-const FONT_SIZE = 14;
 const LOADING_STRING = '... loading ...';
-const BUFFERING_STRING = '...buffering...';
-const RATE_SCALE = 3.0;
-const VIDEO_CONTAINER_HEIGHT = (DEVICE_HEIGHT * 2.0) / 5.0 - FONT_SIZE * 2;
-export default class MainScreen extends React.Component<
-  StackScreenProps<RootStackParamList, 'Main'>,
+export default class HomeScreen extends React.Component<
+  StackScreenProps<MainStackParamList & RootStackParamList, 'Home'>,
   { selectedIndex: number; isPlaying: boolean }
 > {
   playerInstance: any;
-  constructor(props: StackScreenProps<RootStackParamList, 'Main'>) {
+  constructor(
+    props: StackScreenProps<MainStackParamList & RootStackParamList, 'Home'>
+  ) {
     super(props);
     this.playerInstance = null;
     this.state = {
       selectedIndex: 0,
-      showVideo: false,
       playbackInstanceName: LOADING_STRING,
       loopingType: LOOPING_TYPE_ALL,
       muted: false,
@@ -43,7 +37,6 @@ export default class MainScreen extends React.Component<
       rate: 1.0,
       poster: false,
       useNativeControls: false,
-      fullscreen: false,
       throughEarpiece: false,
     };
   }
@@ -55,12 +48,36 @@ export default class MainScreen extends React.Component<
       playThroughEarpieceAndroid: true,
     });
   }
-  setSelectedIndex = (selectedIndex: number) => {
+
+  _onPlaybackStatusUpdate = (status) => {
+    if (status.isLoaded) {
+      this.setState({
+        playbackInstancePosition: status.positionMillis,
+        playbackInstanceDuration: status.durationMillis,
+        shouldPlay: status.shouldPlay,
+        isPlaying: status.isPlaying,
+        isBuffering: status.isBuffering,
+        rate: status.rate,
+        muted: status.isMuted,
+        volume: status.volume,
+        loopingType: status.isLooping ? LOOPING_TYPE_ONE : LOOPING_TYPE_ALL,
+        shouldCorrectPitch: status.shouldCorrectPitch,
+      });
+    } else {
+      if (status.error) {
+        console.log(`FATAL PLAYER ERROR: ${status.error}`);
+      }
+    }
+  };
+  _openPlayer = () => {
+    this.props.navigation.navigate('Player');
+  };
+  _setSelectedIndex = (selectedIndex: number) => {
     this.setState({
       selectedIndex,
     });
   };
-  togglePlay = async () => {
+  _togglePlay = async () => {
     if (!this.playerInstance) {
       const initialStatus = {
         shouldPlay: true,
@@ -89,41 +106,22 @@ export default class MainScreen extends React.Component<
       }
     }
   };
-  _onPlaybackStatusUpdate = (status) => {
-    if (status.isLoaded) {
-      this.setState({
-        playbackInstancePosition: status.positionMillis,
-        playbackInstanceDuration: status.durationMillis,
-        shouldPlay: status.shouldPlay,
-        isPlaying: status.isPlaying,
-        isBuffering: status.isBuffering,
-        rate: status.rate,
-        muted: status.isMuted,
-        volume: status.volume,
-        loopingType: status.isLooping ? LOOPING_TYPE_ONE : LOOPING_TYPE_ALL,
-        shouldCorrectPitch: status.shouldCorrectPitch,
-      });
-    } else {
-      if (status.error) {
-        console.log(`FATAL PLAYER ERROR: ${status.error}`);
-      }
-    }
-  };
   render() {
     return (
-      <View style={styles.container}>
+      <Layout level="1" style={styles.container}>
         <TabBar
           selectedIndex={this.state.selectedIndex}
-          onSelect={this.setSelectedIndex}
+          onSelect={this._setSelectedIndex}
         >
           <Tab title="我的"></Tab>
           <Tab title="发现" />
         </TabBar>
         <PlayerBottomBar
-          togglePlay={this.togglePlay}
+          onPress={this._openPlayer}
+          togglePlay={this._togglePlay}
           isPlaying={this.state.isPlaying}
         />
-      </View>
+      </Layout>
     );
   }
 }

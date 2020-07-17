@@ -4,10 +4,10 @@ import * as React from 'react';
 import { ColorSchemeName } from 'react-native';
 
 import LoginScreen from '../screens/LoginScreen';
-import MainScreen from '../screens/MainScreen';
+import HomeScreen from '../screens/HomeScreen';
+import PlayerScreen from '../screens/PlayerScreen';
 import NotFoundScreen from '../screens/NotFoundScreen';
-import { RootStackParamList } from '../types';
-import BottomTabNavigator from './BottomTabNavigator';
+import { RootStackParamList,MainStackParamList } from '../types';
 import LinkingConfiguration from './LinkingConfiguration';
 
 // If you are not familiar with React Navigation, we recommend going through the
@@ -24,15 +24,24 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
 
 // A root stack navigator is often used for displaying modals on top of all other content
 // Read more here: https://reactnavigation.org/docs/modal
-const Stack = createStackNavigator<RootStackParamList>();
 
+const MainStack = createStackNavigator<MainStackParamList>();
+const RootStack = createStackNavigator<RootStackParamList>();
+
+function MainNavigator() {
+  return (
+    <MainStack.Navigator screenOptions={{ headerShown: false }}>
+      <MainStack.Screen name="Login" component={LoginScreen} />
+      <MainStack.Screen name="Home" component={HomeScreen} />
+    </MainStack.Navigator>
+  )
+}
 function RootNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Main" component={MainScreen} />
-      {/* <Stack.Screen name="Root" component={BottomTabNavigator} /> */}
-      <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
-    </Stack.Navigator>
+    <RootStack.Navigator screenOptions={{ headerShown: false }} mode="modal">
+      <RootStack.Screen name="Main" component={MainNavigator} />
+      <RootStack.Screen name="Player" component={PlayerScreen} />
+      <RootStack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
+    </RootStack.Navigator>
   );
 }

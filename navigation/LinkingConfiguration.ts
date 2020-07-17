@@ -4,8 +4,13 @@ export default {
   prefixes: [Linking.makeUrl('/')],
   config: {
     screens: {
-      Login: 'login',
-      Main: 'main',
+      Main: {
+        screens: {
+          Login: 'login',
+          Home: 'home',
+        },
+      },
+      Player: 'player',
       NotFound: '*',
     },
   },

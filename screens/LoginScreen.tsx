@@ -6,14 +6,14 @@ import Toast from 'react-native-root-toast';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Feather } from '@expo/vector-icons';
 
-import { RootStackParamList } from '../types';
+import { MainStackParamList } from '../types';
 
 const emailRegExp = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 const captchaRegExp = /\d{6}/;
 
 export default function LoginScreen({
   navigation,
-}: StackScreenProps<RootStackParamList, 'Login'>) {
+}: StackScreenProps<MainStackParamList, 'Login'>) {
   const [email, onChangeEmail] = useState('');
   const [captcha, onChangeCaptcha] = useState('');
   const [captchaCoolDown, setCaptchaCoolDown] = useState(true);
@@ -45,7 +45,7 @@ export default function LoginScreen({
     else {
       Toast.show('登录成功');
       await AsyncStorage.setItem('user_info', res.data);
-      navigation.replace('Root');
+      navigation.replace('Home');
     }
   }, [email, captcha]);
   return (
@@ -84,7 +84,7 @@ export default function LoginScreen({
       <Button
         style={[{ width: '100%' }]}
         onPress={() => {
-          navigation.replace('Main');
+          navigation.replace('Home');
         }}
       >
         进入主页
