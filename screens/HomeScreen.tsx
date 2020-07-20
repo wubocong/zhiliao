@@ -6,10 +6,14 @@ import { Audio } from 'expo-av';
 
 import PlayerBottomBar from '../components/PlayerBottomBar';
 import { MainStackParamList, RootStackParamList } from '../types';
+import { inject, observer } from 'mobx-react';
 
 const LOOPING_TYPE_ALL = 0;
 const LOOPING_TYPE_ONE = 1;
 const LOADING_STRING = '... loading ...';
+
+@inject('player')
+@observer
 export default class HomeScreen extends React.Component<
   StackScreenProps<MainStackParamList & RootStackParamList, 'Home'>,
   { selectedIndex: number; isPlaying: boolean }
@@ -22,11 +26,11 @@ export default class HomeScreen extends React.Component<
     this.playerInstance = null;
     this.state = {
       selectedIndex: 0,
-      playbackInstanceName: LOADING_STRING,
+      playerInstanceName: LOADING_STRING,
       loopingType: LOOPING_TYPE_ALL,
       muted: false,
-      playbackInstancePosition: null,
-      playbackInstanceDuration: null,
+      playerInstancePosition: null,
+      playerInstanceDuration: null,
       shouldPlay: false,
       isPlaying: false,
       isBuffering: false,
@@ -49,11 +53,11 @@ export default class HomeScreen extends React.Component<
     });
   }
 
-  _onPlaybackStatusUpdate = (status) => {
+  _onPlayerStatusUpdate = (status) => {
     if (status.isLoaded) {
-      this.setState({
-        playbackInstancePosition: status.positionMillis,
-        playbackInstanceDuration: status.durationMillis,
+      const newState = {
+        playerInstancePosition: status.positionMillis,
+        playerInstanceDuration: status.durationMillis,
         shouldPlay: status.shouldPlay,
         isPlaying: status.isPlaying,
         isBuffering: status.isBuffering,
@@ -62,7 +66,9 @@ export default class HomeScreen extends React.Component<
         volume: status.volume,
         loopingType: status.isLooping ? LOOPING_TYPE_ONE : LOOPING_TYPE_ALL,
         shouldCorrectPitch: status.shouldCorrectPitch,
-      });
+      };
+      this.setState(newState);
+      this.props.player.setStatus(newState);
     } else {
       if (status.error) {
         console.log(`FATAL PLAYER ERROR: ${status.error}`);
@@ -70,7 +76,9 @@ export default class HomeScreen extends React.Component<
     }
   };
   _openPlayer = () => {
-    this.props.navigation.navigate('Player');
+    this.props.navigation.navigate('Player', {
+      _togglePlay: this._togglePlay,
+    });
   };
   _setSelectedIndex = (selectedIndex: number) => {
     this.setState({
@@ -95,7 +103,7 @@ export default class HomeScreen extends React.Component<
             'http://freetyst.nf.migu.cn/public/product5th/product34/2019/05/3020/2019%E5%B9%B405%E6%9C%8828%E6%97%A511%E7%82%B947%E5%88%86%E5%86%85%E5%AE%B9%E5%87%86%E5%85%A5%E6%AD%A3%E4%B8%9C64%E9%A6%96746986/%E6%AD%8C%E6%9B%B2%E4%B8%8B%E8%BD%BD/flac/6005661WKJ2.flac?key=6d2e761987a70098&Tim=1594635486410&channelid=00&msisdn=e21a34e0ebf342cab5123990876387db&CI=6005661WKJ22600913000003988109&F=011002',
         },
         initialStatus,
-        this._onPlaybackStatusUpdate
+        this._onPlayerStatusUpdate
       );
       this.playerInstance = sound;
     } else {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, Image, TouchableOpacity, View } from 'react-native';
 import { Layout } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 
@@ -22,19 +22,24 @@ export default function PlayerBottomBar({
               'https://p2.music.126.net/_UUwBC98AF4ViM5UsO3wlw==/5736152162190997.jpg?param=200y200',
           }}
         />
-        <TouchableOpacity onPress={togglePlay}>
-          <Feather
-            name={isPlaying ? 'pause-circle' : 'play-circle'}
-            size={40}
-          />
-        </TouchableOpacity>
+        <View style={styles.buttonWrapper}>
+          <TouchableOpacity onPress={togglePlay}>
+            <Feather
+              name={isPlaying ? 'pause-circle' : 'play-circle'}
+              size={40}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Feather name="list" size={40} />
+          </TouchableOpacity>
+        </View>
       </Layout>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper:{
+  wrapper: {
     width: '100%',
     position: 'absolute',
     left: 0,
@@ -48,5 +53,8 @@ const styles = StyleSheet.create({
   cover: {
     width: 80,
     height: 80,
+  },
+  buttonWrapper: {
+    flexDirection: 'row',
   },
 });
