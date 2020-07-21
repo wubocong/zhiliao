@@ -1,5 +1,5 @@
 import { StackScreenProps } from '@react-navigation/stack';
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Layout, Input } from '@ui-kitten/components';
 import Toast from 'react-native-root-toast';
@@ -17,7 +17,7 @@ export default function LoginScreen({
   const [email, onChangeEmail] = useState('');
   const [captcha, onChangeCaptcha] = useState('');
   const [captchaCoolDown, setCaptchaCoolDown] = useState(true);
-  const sendCaptcha = useCallback(async () => {
+  const sendCaptcha = async () => {
     const res = await fetch(
       `https://engine.mebtte.com/1/verify_code?type=signin&email=${email}`
     ).then((res) => res.json());
@@ -29,8 +29,8 @@ export default function LoginScreen({
         setCaptchaCoolDown(true);
       }, 60 * 1000);
     }
-  }, [email]);
-  const login = useCallback(async () => {
+  };
+  const login = async () => {
     const res = await fetch('https://engine.mebtte.com/1/user/signin', {
       body: JSON.stringify({
         email,
@@ -44,10 +44,10 @@ export default function LoginScreen({
     if (res.code !== 0) Toast.show(res.message);
     else {
       Toast.show('登录成功');
-      await AsyncStorage.setItem('user_info', res.data);
+      await AsyncStorage.setItem('user_info', JSON.stringify(res.data));
       navigation.replace('Home');
     }
-  }, [email, captcha]);
+  };
   return (
     <Layout style={styles.container} level="1">
       <Input

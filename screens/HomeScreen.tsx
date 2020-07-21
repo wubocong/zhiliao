@@ -1,10 +1,11 @@
 import { StackScreenProps } from '@react-navigation/stack';
 import * as React from 'react';
-import { StyleSheet, View, Dimensions } from 'react-native';
-import { Tab, TabBar, Layout } from '@ui-kitten/components';
+import { StyleSheet } from 'react-native';
+import { Tab, TabView, Layout, Text } from '@ui-kitten/components';
 import { Audio } from 'expo-av';
 
 import PlayerBottomBar from '../components/PlayerBottomBar';
+import SearchTab from '../components/SearchTab';
 import { MainStackParamList, RootStackParamList } from '../types';
 import { inject, observer } from 'mobx-react';
 
@@ -117,13 +118,17 @@ export default class HomeScreen extends React.Component<
   render() {
     return (
       <Layout level="1" style={styles.container}>
-        <TabBar
+        <TabView
           selectedIndex={this.state.selectedIndex}
           onSelect={this._setSelectedIndex}
         >
-          <Tab title="我的"></Tab>
-          <Tab title="发现" />
-        </TabBar>
+          <Tab title="我的">
+            <Text>1</Text>
+          </Tab>
+          <Tab title="发现">
+            <SearchTab />
+          </Tab>
+        </TabView>
         <PlayerBottomBar
           onPress={this._openPlayer}
           togglePlay={this._togglePlay}

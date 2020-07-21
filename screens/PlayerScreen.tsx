@@ -5,13 +5,18 @@ import { Layout } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 import { observer, inject } from 'mobx-react';
 
-import { RootStackParamList } from '../types';
+import { RootStackParamList, MainStackParamList } from '../types';
 
 @inject('player')
 @observer
 export default class PlayerScreen extends React.Component<
-  StackScreenProps<RootStackParamList, 'Player'>
+  StackScreenProps<RootStackParamList & MainStackParamList, 'Player'>
 > {
+  componentDidMount() {
+    if (!this.props.route.params?._togglePlay) {
+      this.props.navigation.replace('Home');
+    }
+  }
   _goBack = () => {
     this.props.navigation.goBack();
   };
