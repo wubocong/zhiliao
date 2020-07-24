@@ -3,6 +3,7 @@ import * as React from 'react';
 import { StyleSheet } from 'react-native';
 import { Tab, TabView, Layout, Text } from '@ui-kitten/components';
 import { Audio } from 'expo-av';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import PlayerBottomBar from '../components/PlayerBottomBar';
 import SearchTab from '../components/SearchTab';
@@ -117,8 +118,9 @@ export default class HomeScreen extends React.Component<
   };
   render() {
     return (
-      <Layout level="1" style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <TabView
+          style={{ flex: 1 }}
           selectedIndex={this.state.selectedIndex}
           onSelect={this._setSelectedIndex}
         >
@@ -134,7 +136,7 @@ export default class HomeScreen extends React.Component<
           togglePlay={this._togglePlay}
           isPlaying={this.state.isPlaying}
         />
-      </Layout>
+      </SafeAreaView>
     );
   }
 }
@@ -144,6 +146,5 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingTop: 20,
-    paddingBottom: 20,
   },
 });

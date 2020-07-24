@@ -1,13 +1,21 @@
 import React from 'react';
-import { StyleSheet, Image, TouchableOpacity, View } from 'react-native';
+import {
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  View,
+  ImageSourcePropType,
+} from 'react-native';
 import { Layout } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 
 export default function PlayerBottomBar({
+  image = require('../assets/images/default-music-logo.webp'),
   isPlaying,
   togglePlay,
   onPress,
 }: {
+  image: ImageSourcePropType;
   isPlaying: boolean;
   togglePlay: () => void;
   onPress: () => void;
@@ -15,13 +23,7 @@ export default function PlayerBottomBar({
   return (
     <TouchableOpacity style={styles.wrapper} onPress={onPress}>
       <Layout style={styles.container} level="2">
-        <Image
-          style={styles.cover}
-          source={{
-            uri:
-              'https://p2.music.126.net/_UUwBC98AF4ViM5UsO3wlw==/5736152162190997.jpg?param=200y200',
-          }}
-        />
+        <Image style={styles.cover} source={image} />
         <View style={styles.buttonWrapper}>
           <TouchableOpacity onPress={togglePlay}>
             <Feather
@@ -44,6 +46,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     bottom: 0,
+    zIndex: 10,
   },
   container: {
     justifyContent: 'space-between',

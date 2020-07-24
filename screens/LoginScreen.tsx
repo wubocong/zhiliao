@@ -17,6 +17,7 @@ export default function LoginScreen({
   const [email, onChangeEmail] = useState('');
   const [captcha, onChangeCaptcha] = useState('');
   const [captchaCoolDown, setCaptchaCoolDown] = useState(true);
+  const [token, setToken] = useState('');
   const sendCaptcha = async () => {
     const res = await fetch(
       `https://engine.mebtte.com/1/verify_code?type=signin&email=${email}`
@@ -83,12 +84,15 @@ export default function LoginScreen({
       </Button>
       <Button
         style={[{ width: '100%' }]}
-        onPress={() => {
+        onPress={async () => {
+          if (token)
+            await AsyncStorage.setItem('user_info', JSON.stringify({ token }));
           navigation.replace('Home');
         }}
       >
         进入主页
       </Button>
+      <Input onChangeText={setToken} value={token}></Input>
     </Layout>
   );
 }
