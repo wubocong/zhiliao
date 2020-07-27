@@ -86,6 +86,8 @@ const styles = StyleSheet.create({
     borderTopColor: '#c0c4cc',
     borderTopWidth: 1,
     height: 60,
+    paddingLeft: 10,
+    paddingRight: 10
   },
   musicInfo: {
     flexDirection: 'column',
