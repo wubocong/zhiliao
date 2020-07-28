@@ -1,5 +1,5 @@
 import { StackScreenProps } from '@react-navigation/stack';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Layout, Input } from '@ui-kitten/components';
 import Toast from 'react-native-root-toast';
@@ -49,6 +49,11 @@ export default function LoginScreen({
       navigation.replace('Home');
     }
   };
+  useEffect(() => {
+    AsyncStorage.getItem('user_info').then((str) => {
+      if (JSON.parse(str as string).token) navigation.replace('Home');
+    });
+  }, []);
   return (
     <Layout style={styles.container} level="1">
       <Input

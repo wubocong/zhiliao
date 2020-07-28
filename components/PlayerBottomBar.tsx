@@ -6,16 +6,17 @@ import {
   View,
   ImageSourcePropType,
 } from 'react-native';
-import { Layout } from '@ui-kitten/components';
+import { Layout, Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 
+import { Song } from '../types';
 export default function PlayerBottomBar({
-  image = require('../assets/images/default-music-logo.webp'),
+  song,
   isPlaying,
   togglePlay,
   onPress,
 }: {
-  image: ImageSourcePropType;
+  song?: Song;
   isPlaying: boolean;
   togglePlay: () => void;
   onPress: () => void;
@@ -23,7 +24,27 @@ export default function PlayerBottomBar({
   return (
     <TouchableOpacity style={styles.wrapper} onPress={onPress}>
       <Layout style={styles.container} level="2">
-        <Image style={styles.cover} source={image} />
+        <View style={styles.songWrapper}>
+          <Image
+            style={styles.cover}
+            source={
+              song
+                ? { uri: song?.cover }
+                : require('../assets/images/default-music-logo.webp')
+            }
+          />
+          <View style={styles.songInfo}>
+            <Text>{song?.name}</Text>
+            <View style={styles.singerWrapper}>
+              <Text style={styles.singer}>{song?.singers[0].name}</Text>
+              {song?.singers.slice(1).map((singer, index) => (
+                <Text style={styles.singer} key={index}>
+                  {'&' + singer.name}
+                </Text>
+              ))}
+            </View>
+          </View>
+        </View>
         <View style={styles.buttonWrapper}>
           <TouchableOpacity onPress={togglePlay}>
             <Feather
@@ -49,13 +70,32 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   container: {
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingLeft: 5,
+    paddingRight: 5,
     justifyContent: 'space-between',
     alignItems: 'center',
     flexDirection: 'row',
   },
+  songWrapper: {
+    flexDirection: 'row',
+  },
   cover: {
-    width: 80,
-    height: 80,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 12,
+  },
+  songInfo: {
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+  },
+  singerWrapper: {
+    flexDirection: 'row',
+  },
+  singer: {
+    fontSize: 12,
   },
   buttonWrapper: {
     flexDirection: 'row',
