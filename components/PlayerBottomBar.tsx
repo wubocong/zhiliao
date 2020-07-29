@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { SyntheticEvent } from 'react';
 import {
   StyleSheet,
   Image,
   TouchableOpacity,
   View,
-  ImageSourcePropType,
+  GestureResponderEvent,
 } from 'react-native';
 import { Layout, Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
@@ -19,10 +19,14 @@ export default function PlayerBottomBar({
   song?: Song;
   isPlaying: boolean;
   togglePlay: () => void;
-  onPress: () => void;
+  onPress: (e: GestureResponderEvent) => void;
 }) {
   return (
-    <TouchableOpacity style={styles.wrapper} onPress={onPress}>
+    <TouchableOpacity
+      activeOpacity={song ? 0.2 : 1}
+      style={styles.wrapper}
+      onPress={onPress}
+    >
       <Layout style={styles.container} level="2">
         <View style={styles.songWrapper}>
           <Image
@@ -46,7 +50,7 @@ export default function PlayerBottomBar({
           </View>
         </View>
         <View style={styles.buttonWrapper}>
-          <TouchableOpacity onPress={togglePlay}>
+          <TouchableOpacity activeOpacity={song ? 0.2 : 1} onPress={togglePlay}>
             <Feather
               name={isPlaying ? 'pause-circle' : 'play-circle'}
               size={40}

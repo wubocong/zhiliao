@@ -16,8 +16,8 @@ type PlayerStatus = {
 };
 export default class PlayerState {
   @observable status = {
-    playerInstancePosition: undefined,
-    playerInstanceDuration: undefined,
+    playerInstancePosition: 0,
+    playerInstanceDuration: 1,
     shouldPlay: false,
     isPlaying: false,
     isBuffering: false,

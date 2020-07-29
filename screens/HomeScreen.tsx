@@ -1,6 +1,6 @@
 import { StackScreenProps } from '@react-navigation/stack';
-import * as React from 'react';
-import { StyleSheet } from 'react-native';
+import React from 'react';
+import { StyleSheet, GestureResponderEvent } from 'react-native';
 import { Tab, TabView, Layout, Text } from '@ui-kitten/components';
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -74,9 +74,7 @@ export default class HomeScreen extends React.Component<
     });
   }
 
-  _loadSong = async (
-    uri: string = 'http://freetyst.nf.migu.cn/public/product5th/product34/2019/05/3020/2019%E5%B9%B405%E6%9C%8828%E6%97%A511%E7%82%B947%E5%88%86%E5%86%85%E5%AE%B9%E5%87%86%E5%85%A5%E6%AD%A3%E4%B8%9C64%E9%A6%96746986/%E6%AD%8C%E6%9B%B2%E4%B8%8B%E8%BD%BD/flac/6005661WKJ2.flac?key=6d2e761987a70098&Tim=1594635486410&channelid=00&msisdn=e21a34e0ebf342cab5123990876387db&CI=6005661WKJ22600913000003988109&F=011002'
-  ) => {
+  _loadSong = async (uri: string) => {
     if (this.playerInstance) {
       await this.playerInstance.unloadAsync();
       this.playerInstance = null;
@@ -121,11 +119,14 @@ export default class HomeScreen extends React.Component<
       }
     }
   };
-  _openPlayer = () => {
-    this.props.navigation.navigate('Player', {
-      setLoopingType: this._setLoopingType,
-      togglePlay: this._togglePlay,
-    });
+  _openPlayer = (e: GestureResponderEvent) => {
+    e.preventDefault(); // 防止web端点击穿透
+    if (this.state.currentSong)
+      this.props.navigation.navigate('Player', {
+        setLoopingType: this._setLoopingType,
+        togglePlay: this._togglePlay,
+        song: this.state.currentSong,
+      });
   };
   _setSelectedIndex = (selectedIndex: number) => {
     this.setState({
@@ -148,7 +149,7 @@ export default class HomeScreen extends React.Component<
   };
   _togglePlay = () => {
     if (!this.playerInstance) {
-      this._loadSong();
+      if (this.state.currentSong) this._loadSong(this.state.currentSong.normal);
     } else {
       if (this.state.isPlaying) {
         this.playerInstance.pauseAsync();
