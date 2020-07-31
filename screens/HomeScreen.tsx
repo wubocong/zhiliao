@@ -124,14 +124,10 @@ export default class HomeScreen extends React.Component<
     if (this.state.currentSong)
       this.props.navigation.navigate('Player', {
         setLoopingType: this._setLoopingType,
-        togglePlay: this._togglePlay,
+        setPosition: this._setPosition,
         song: this.state.currentSong,
+        togglePlay: this._togglePlay,
       });
-  };
-  _setSelectedIndex = (selectedIndex: number) => {
-    this.setState({
-      selectedIndex,
-    });
   };
   _setLoopingType = async (loopingType: number) => {
     if (this.state.loopingType !== loopingType) {
@@ -142,6 +138,16 @@ export default class HomeScreen extends React.Component<
       this.setState({ loopingType });
       this.props.player.setStatus({ loopingType });
     }
+  };
+
+  _setSelectedIndex = (selectedIndex: number) => {
+    this.setState({ selectedIndex });
+  };
+  _setPosition = (value: number) => {
+    if (this.state.playerInstanceDuration)
+      this.playerInstance?.setPositionAsync(
+        Math.round(value * this.state.playerInstanceDuration)
+      );
   };
   _switchSong = (song: Song) => {
     this.setState({ currentSong: song });

@@ -7,8 +7,9 @@ export type RootStackParamList = {
   NotFound: undefined;
   Player: {
     setLoopingType: (loopingType: number) => Promise<void>;
-    togglePlay: () => void;
+    setPosition: (value: number) => void;
     song?: Song;
+    togglePlay: () => void;
   };
   Main: undefined;
 };

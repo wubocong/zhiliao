@@ -1,6 +1,14 @@
 import { StackScreenProps } from '@react-navigation/stack';
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity, Dimensions } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Animated,
+  Image,
+  Dimensions,
+  Easing,
+} from 'react-native';
 import { Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
@@ -14,13 +22,49 @@ import { RootStackParamList, MainStackParamList } from '../types';
 import PlayerState from '../state/PlayerState';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
+type State = {
+  currentValue: number;
+  isSliding: boolean;
+};
 @inject('player')
 @observer
 export default class PlayerScreen extends React.Component<
   StackScreenProps<RootStackParamList & MainStackParamList, 'Player'> & {
     player: PlayerState;
-  }
+  },
+  State
 > {
+  rotateDegree = new Animated.Value(0);
+  rotateAnimation = Animated.loop(
+    Animated.sequence([
+      Animated.timing(this.rotateDegree, {
+        duration: 5000,
+        toValue: 360,
+        useNativeDriver: false,
+        easing: Easing.linear,
+      }),
+      Animated.timing(this.rotateDegree, {
+        duration: 0,
+        toValue: 0,
+        useNativeDriver: false,
+        easing: Easing.linear,
+      }),
+    ])
+  );
+  constructor(
+    props: StackScreenProps<
+      RootStackParamList & MainStackParamList,
+      'Player'
+    > & {
+      player: PlayerState;
+    }
+  ) {
+    super(props);
+    this.state = {
+      currentValue: 0,
+      isSliding: false,
+    };
+  }
   componentDidMount() {
     if (!this.props.route.params) this.props.navigation.replace('Main');
     else if (
@@ -32,9 +76,16 @@ export default class PlayerScreen extends React.Component<
   _goBack = () => {
     this.props.navigation.goBack();
   };
+  _onSlidingComplete = (value: number) => {
+    this.setState({ isSliding: false });
+    this.props.route.params.setPosition(value);
+  };
+  _onSlidingStart = (currentValue: number) => {
+    this.setState({ isSliding: true, currentValue });
+  };
   render() {
     if (!this.props.route.params) return null;
-    const { togglePlay, setLoopingType, song } = this.props.route.params;
+    const { setLoopingType, song, togglePlay } = this.props.route.params;
     const {
       isPlaying,
       loopingType,
@@ -50,8 +101,8 @@ export default class PlayerScreen extends React.Component<
           <View style={styles.songInfo}>
             <Text>{song?.name}</Text>
             <View style={styles.singerWrapper}>
-              <Text style={styles.singer}>{song?.singers[0].name}</Text>
-              {song?.singers.slice(1).map((singer, index) => (
+              <Text style={styles.singer}>{song?.singers?.[0].name}</Text>
+              {song?.singers?.slice(1).map((singer, index) => (
                 <Text style={styles.singer} key={index}>
                   {'&' + singer.name}
                 </Text>
@@ -59,14 +110,32 @@ export default class PlayerScreen extends React.Component<
             </View>
           </View>
         </View>
-        <View>
-          <Slider
-            style={styles.progressBar}
-            minimumValue={0}
-            maximumValue={1}
-            value={playerInstancePosition / playerInstanceDuration}
+        <View style={styles.coverWrapper}>
+          <Image
+            style={[
+              styles.cover,
+              {
+                transform: [{ rotate: this.rotateDegree + 'deg' }],
+              },
+            ]}
+            source={{ uri: song?.cover }}
           />
-
+        </View>
+        <View>
+          <View style={styles.progressBarWrapper}>
+            <Slider
+              style={styles.progressBar}
+              minimumValue={0}
+              maximumValue={1}
+              onSlidingStart={this._onSlidingStart}
+              onSlidingComplete={this._onSlidingComplete}
+              value={
+                this.state.isSliding
+                  ? this.state.currentValue
+                  : playerInstancePosition / playerInstanceDuration
+              }
+            />
+          </View>
           <View style={styles.controller}>
             <TouchableOpacity
               onPress={() => setLoopingType((loopingType + 1) % 3)}
@@ -125,9 +194,19 @@ const styles = StyleSheet.create({
   singer: {
     fontSize: 12,
   },
-  progressBar: {
+  coverWrapper: {
     margin: 20,
+  },
+  cover: {
     width: DEVICE_WIDTH - 40,
+    height: DEVICE_WIDTH - 40,
+    borderRadius: (DEVICE_WIDTH - 40) / 2,
+  },
+  progressBarWrapper: {
+    margin: 20,
+  },
+  progressBar: {
+    width: '100%',
     height: 40,
   },
   controller: {
