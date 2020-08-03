@@ -5,7 +5,6 @@ import {
   View,
   TouchableOpacity,
   Animated,
-  Image,
   Dimensions,
   Easing,
 } from 'react-native';
@@ -34,19 +33,19 @@ export default class PlayerScreen extends React.Component<
   },
   State
 > {
-  rotateDegree = new Animated.Value(0);
+  rotateValue = new Animated.Value(0);
   rotateAnimation = Animated.loop(
     Animated.sequence([
-      Animated.timing(this.rotateDegree, {
-        duration: 5000,
-        toValue: 360,
-        useNativeDriver: false,
+      Animated.timing(this.rotateValue, {
+        duration: 20000,
+        toValue: 1,
+        useNativeDriver: true,
         easing: Easing.linear,
       }),
-      Animated.timing(this.rotateDegree, {
+      Animated.timing(this.rotateValue, {
         duration: 0,
         toValue: 0,
-        useNativeDriver: false,
+        useNativeDriver: true,
         easing: Easing.linear,
       }),
     ])
@@ -72,6 +71,7 @@ export default class PlayerScreen extends React.Component<
       typeof this.props.route.params.setLoopingType !== 'function'
     )
       this.props.navigation.replace('Main');
+    else if (this.props.player.status.isPlaying) this.rotateAnimation.start();
   }
   _goBack = () => {
     this.props.navigation.goBack();
@@ -83,15 +83,50 @@ export default class PlayerScreen extends React.Component<
   _onSlidingStart = (currentValue: number) => {
     this.setState({ isSliding: true, currentValue });
   };
+  _togglePlay = () => {
+    if (this.props.player.status.isPlaying) {
+      this.rotateValue.stopAnimation((value) => {
+        this.rotateValue = new Animated.Value(value);
+
+        this.rotateAnimation = Animated.loop(
+          Animated.sequence([
+            Animated.timing(this.rotateValue, {
+              duration: Math.floor(20000 * (1 - value)),
+              toValue: 1,
+              useNativeDriver: true,
+              easing: Easing.linear,
+            }),
+            Animated.timing(this.rotateValue, {
+              duration: 0,
+              toValue: 0,
+              useNativeDriver: true,
+              easing: Easing.linear,
+            }),
+            Animated.timing(this.rotateValue, {
+              duration: Math.floor(20000 * value),
+              toValue: value,
+              useNativeDriver: true,
+              easing: Easing.linear,
+            }),
+          ])
+        );
+      });
+    } else this.rotateAnimation.start();
+    this.props.route.params.togglePlay();
+  };
   render() {
     if (!this.props.route.params) return null;
-    const { setLoopingType, song, togglePlay } = this.props.route.params;
+    const { setLoopingType, song } = this.props.route.params;
     const {
       isPlaying,
       loopingType,
       playerInstancePosition,
       playerInstanceDuration,
     } = this.props.player.status;
+    const rotateDegree = this.rotateValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '360deg'],
+    });
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.topBar}>
@@ -111,11 +146,11 @@ export default class PlayerScreen extends React.Component<
           </View>
         </View>
         <View style={styles.coverWrapper}>
-          <Image
+          <Animated.Image
             style={[
               styles.cover,
               {
-                transform: [{ rotate: this.rotateDegree + 'deg' }],
+                transform: [{ rotate: rotateDegree }],
               },
             ]}
             source={{ uri: song?.cover }}
@@ -158,7 +193,7 @@ export default class PlayerScreen extends React.Component<
               <Feather
                 name={isPlaying ? 'pause-circle' : 'play-circle'}
                 size={48}
-                onPress={togglePlay}
+                onPress={this._togglePlay}
               ></Feather>
             </TouchableOpacity>
             <TouchableOpacity>
