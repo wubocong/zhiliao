@@ -116,7 +116,8 @@ export default class PlayerScreen extends React.Component<
   };
   render() {
     if (!this.props.route.params) return null;
-    const { setLoopingType, song } = this.props.route.params;
+    const { setLoopingType } = this.props.route.params;
+    const { currentSong: song } = this.props.player;
     const {
       isPlaying,
       loopingType,

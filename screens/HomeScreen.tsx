@@ -1,13 +1,19 @@
 import { StackScreenProps } from '@react-navigation/stack';
 import React from 'react';
-import { StyleSheet, GestureResponderEvent } from 'react-native';
-import { Tab, TabView, Layout, Text } from '@ui-kitten/components';
+import {
+  StyleSheet,
+  GestureResponderEvent,
+  Animated,
+  Easing,
+} from 'react-native';
+import { Tab, TabView, Modal, Text, Layout } from '@ui-kitten/components';
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { inject, observer } from 'mobx-react';
 
 import PlayerBottomBar from '../components/PlayerBottomBar';
 import SearchTab from '../components/SearchTab';
+import Playlist from '../components/Playlist';
 import { MainStackParamList, RootStackParamList, Song } from '../types';
 import PlayerState from '../state/PlayerState';
 
@@ -16,7 +22,7 @@ const LOOPING_TYPE_ONE = 1;
 const LOOPING_TYPE_RANDOM = 2;
 
 type State = {
-  currentSong?: Song;
+  playlistVisible: boolean;
   selectedIndex: number;
 
   playerInstancePosition?: number;
@@ -47,7 +53,7 @@ export default class HomeScreen extends React.Component<
     super(props);
     this.playerInstance = null;
     this.state = {
-      currentSong: undefined,
+      playlistVisible: false,
       selectedIndex: 0,
 
       playerInstancePosition: undefined,
@@ -73,7 +79,35 @@ export default class HomeScreen extends React.Component<
       playThroughEarpieceAndroid: false,
     });
   }
-
+  _addSongToPlaylistAndPlay = (song: Song) => {
+    const { playlist, setPlaylist } = this.props.player;
+    if (!playlist.find((item) => item.id === song.id)) {
+      playlist.push(song);
+      setPlaylist(playlist);
+    }
+    this._switchSong(song);
+  };
+  _closePlaylist = () => {
+    this.setState({ playlistVisible: false });
+  };
+  _deleteSongfromPlaylist = (song: Song) => {
+    const {
+      playlist,
+      currentSong,
+      setPlaylist,
+      setCurrentSong,
+    } = this.props.player;
+    if (song.id === currentSong?.id) {
+      if (playlist.length === 1) setCurrentSong(undefined);
+      else {
+        const nextSongIndex =
+          (playlist.findIndex((item) => item.id === song.id) + 1) %
+          playlist.length;
+        this._switchSong(playlist[nextSongIndex]);
+      }
+    }
+    setPlaylist(playlist.filter((item) => item.id !== song.id));
+  };
   _loadSong = async (uri: string) => {
     if (this.playerInstance) {
       await this.playerInstance.unloadAsync();
@@ -121,13 +155,15 @@ export default class HomeScreen extends React.Component<
   };
   _openPlayer = (e: GestureResponderEvent) => {
     e.preventDefault(); // 防止web端点击穿透
-    if (this.state.currentSong)
+    if (this.props.player.currentSong)
       this.props.navigation.navigate('Player', {
         setLoopingType: this._setLoopingType,
         setPosition: this._setPosition,
-        song: this.state.currentSong,
         togglePlay: this._togglePlay,
       });
+  };
+  _openPlaylist = () => {
+    this.setState({ playlistVisible: true });
   };
   _setLoopingType = async (loopingType: number) => {
     if (this.state.loopingType !== loopingType) {
@@ -150,12 +186,13 @@ export default class HomeScreen extends React.Component<
       );
   };
   _switchSong = (song: Song) => {
-    this.setState({ currentSong: song });
+    this.props.player.setCurrentSong(song);
     this._loadSong(song.normal);
   };
   _togglePlay = () => {
     if (!this.playerInstance) {
-      if (this.state.currentSong) this._loadSong(this.state.currentSong.normal);
+      if (this.props.player.currentSong)
+        this._loadSong(this.props.player.currentSong.normal);
     } else {
       if (this.state.isPlaying) {
         this.playerInstance.pauseAsync();
@@ -165,26 +202,41 @@ export default class HomeScreen extends React.Component<
     }
   };
   render() {
+    const { currentSong, playlist } = this.props.player;
+    const { playlistVisible, selectedIndex } = this.state;
     return (
       <SafeAreaView style={styles.container}>
         <TabView
           style={{ flex: 1 }}
-          selectedIndex={this.state.selectedIndex}
+          selectedIndex={selectedIndex}
           onSelect={this._setSelectedIndex}
         >
           <Tab title="我的">
             <Text>1</Text>
           </Tab>
           <Tab title="发现">
-            <SearchTab switchSong={this._switchSong} />
+            <SearchTab addSongToPlaylistAndPlay={this._addSongToPlaylistAndPlay} />
           </Tab>
         </TabView>
         <PlayerBottomBar
-          song={this.state.currentSong}
+          song={currentSong}
           onPress={this._openPlayer}
           togglePlay={this._togglePlay}
+          openPlaylist={this._openPlaylist}
           isPlaying={this.state.isPlaying}
         />
+        <Modal
+          visible={playlistVisible}
+          backdropStyle={styles.playlistBackdrop}
+          onBackdropPress={this._closePlaylist}
+        >
+          <Playlist
+            currentSong={currentSong}
+            playlist={playlist}
+            playSongInPlaylist={this._switchSong}
+            deleteSongfromPlaylist={this._deleteSongfromPlaylist}
+          />
+        </Modal>
       </SafeAreaView>
     );
   }
@@ -195,5 +247,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingTop: 20,
+  },
+  playlistBackdrop: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
 });

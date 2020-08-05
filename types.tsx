@@ -8,7 +8,6 @@ export type RootStackParamList = {
   Player: {
     setLoopingType: (loopingType: number) => Promise<void>;
     setPosition: (value: number) => void;
-    song?: Song;
     togglePlay: () => void;
   };
   Main: undefined;

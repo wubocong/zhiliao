@@ -1,4 +1,6 @@
-import { observable, action, computed } from 'mobx';
+import { observable, action } from 'mobx';
+
+import { Song } from '../types';
 
 const LOOPING_TYPE_ALL = 0;
 const LOOPING_TYPE_ONE = 1;
@@ -15,6 +17,8 @@ type PlayerStatus = {
   shouldCorrectPitch?: boolean;
 };
 export default class PlayerState {
+  @observable playlist: Song[] = [];
+  @observable currentSong?: Song;
   @observable status = {
     playerInstancePosition: 0,
     playerInstanceDuration: 1,
@@ -29,5 +33,11 @@ export default class PlayerState {
   };
   @action setStatus = (statusObject: PlayerStatus) => {
     Object.assign(this.status, statusObject);
+  };
+  @action setCurrentSong = (song: Song | undefined) => {
+    this.currentSong = song;
+  };
+  @action setPlaylist = (playlist: Song[]) => {
+    this.playlist = playlist;
   };
 }

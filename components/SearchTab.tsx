@@ -15,9 +15,9 @@ import { Song } from '../types';
 
 const DEVICE_HEIGHT = Dimensions.get('window').height;
 export default function SearchTab({
-  switchSong,
+  addSongToPlaylistAndPlay,
 }: {
-  switchSong: (song: Song) => void;
+  addSongToPlaylistAndPlay: (song: Song) => void;
 }) {
   const [inputText, onChangeInputText] = useState('');
   const [songList, setSongList] = useState([]);
@@ -50,19 +50,14 @@ export default function SearchTab({
         returnKeyType="search"
       />
       <ScrollView>
-        <Layout
-          style={{
-            marginBottom: 80,
-          }}
-          level="1"
-        >
+        <Layout level="1">
           {songList.map((song: Song, index) => (
             <TouchableOpacity
               key={index}
               style={styles.songItem}
               onPress={(e) => {
                 e.preventDefault(); // 处理 react-native-web bug
-                switchSong(song);
+                addSongToPlaylistAndPlay(song);
               }}
             >
               <View style={styles.songInfo}>

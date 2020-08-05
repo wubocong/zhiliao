@@ -15,11 +15,13 @@ export default function PlayerBottomBar({
   isPlaying,
   togglePlay,
   onPress,
+  openPlaylist,
 }: {
   song?: Song;
   isPlaying: boolean;
   togglePlay: () => void;
   onPress: (e: GestureResponderEvent) => void;
+  openPlaylist: () => void;
 }) {
   return (
     <TouchableOpacity
@@ -56,7 +58,7 @@ export default function PlayerBottomBar({
               size={40}
             />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={openPlaylist}>
             <Feather name="list" size={40} />
           </TouchableOpacity>
         </View>
