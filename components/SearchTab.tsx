@@ -83,6 +83,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     height: DEVICE_HEIGHT - 54, // 不设置height web无法滚动
+    paddingBottom: 80,
   },
   input: {
     width: '100%',

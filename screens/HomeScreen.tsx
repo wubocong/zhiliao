@@ -1,12 +1,7 @@
 import { StackScreenProps } from '@react-navigation/stack';
 import React from 'react';
-import {
-  StyleSheet,
-  GestureResponderEvent,
-  Animated,
-  Easing,
-} from 'react-native';
-import { Tab, TabView, Modal, Text, Layout } from '@ui-kitten/components';
+import { StyleSheet, GestureResponderEvent, BackHandler } from 'react-native';
+import { Tab, TabView, Modal, Text } from '@ui-kitten/components';
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { inject, observer } from 'mobx-react';
@@ -78,6 +73,10 @@ export default class HomeScreen extends React.Component<
       interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
       playThroughEarpieceAndroid: false,
     });
+    BackHandler.addEventListener('hardwareBackPress', this._onBackPress);
+  }
+  componentWillUnmount() {
+    BackHandler.removeEventListener('hardwareBackPress', this._onBackPress);
   }
   _addSongToPlaylistAndPlay = (song: Song) => {
     const { playlist, setPlaylist } = this.props.player;
@@ -129,6 +128,13 @@ export default class HomeScreen extends React.Component<
       this._onPlayerStatusUpdate
     );
     this.playerInstance = sound;
+  };
+  _onBackPress = () => {
+    if (this.state.playlistVisible) {
+      this.setState({ playlistVisible: false });
+      return true;
+    }
+    return false;
   };
   _onPlayerStatusUpdate = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
@@ -215,10 +221,13 @@ export default class HomeScreen extends React.Component<
             <Text>1</Text>
           </Tab>
           <Tab title="发现">
-            <SearchTab addSongToPlaylistAndPlay={this._addSongToPlaylistAndPlay} />
+            <SearchTab
+              addSongToPlaylistAndPlay={this._addSongToPlaylistAndPlay}
+            />
           </Tab>
         </TabView>
         <PlayerBottomBar
+          style={{ display: playlist.length === 0 ? 'none' : 'flex' }}
           song={currentSong}
           onPress={this._openPlayer}
           togglePlay={this._togglePlay}

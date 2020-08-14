@@ -5,7 +5,6 @@ import {
   View,
   TouchableOpacity,
   Animated,
-  Dimensions,
   Easing,
 } from 'react-native';
 import { Text } from '@ui-kitten/components';
@@ -19,8 +18,7 @@ import Slider from '@react-native-community/slider';
 
 import { RootStackParamList, MainStackParamList } from '../types';
 import PlayerState from '../state/PlayerState';
-
-const DEVICE_WIDTH = Dimensions.get('window').width;
+import Layout from '../constants/Layout';
 type State = {
   currentValue: number;
   isSliding: boolean;
@@ -39,13 +37,13 @@ export default class PlayerScreen extends React.Component<
       Animated.timing(this.rotateValue, {
         duration: 20000,
         toValue: 1,
-        useNativeDriver: true,
+        useNativeDriver: false,
         easing: Easing.linear,
       }),
       Animated.timing(this.rotateValue, {
         duration: 0,
         toValue: 0,
-        useNativeDriver: true,
+        useNativeDriver: false,
         easing: Easing.linear,
       }),
     ])
@@ -87,25 +85,24 @@ export default class PlayerScreen extends React.Component<
     if (this.props.player.status.isPlaying) {
       this.rotateValue.stopAnimation((value) => {
         this.rotateValue = new Animated.Value(value);
-
         this.rotateAnimation = Animated.loop(
           Animated.sequence([
             Animated.timing(this.rotateValue, {
               duration: Math.floor(20000 * (1 - value)),
               toValue: 1,
-              useNativeDriver: true,
+              useNativeDriver: false,
               easing: Easing.linear,
             }),
             Animated.timing(this.rotateValue, {
               duration: 0,
               toValue: 0,
-              useNativeDriver: true,
+              useNativeDriver: false,
               easing: Easing.linear,
             }),
             Animated.timing(this.rotateValue, {
               duration: Math.floor(20000 * value),
               toValue: value,
-              useNativeDriver: true,
+              useNativeDriver: false,
               easing: Easing.linear,
             }),
           ])
@@ -135,7 +132,7 @@ export default class PlayerScreen extends React.Component<
             <Feather name="arrow-left" size={24} />
           </TouchableOpacity>
           <View style={styles.songInfo}>
-            <Text>{song?.name}</Text>
+            <Text style={{ fontSize: 18 }}>{song?.name}</Text>
             <View style={styles.singerWrapper}>
               <Text style={styles.singer}>{song?.singers?.[0].name}</Text>
               {song?.singers?.slice(1).map((singer, index) => (
@@ -176,16 +173,21 @@ export default class PlayerScreen extends React.Component<
             <TouchableOpacity
               onPress={() => setLoopingType((loopingType + 1) % 3)}
             >
-              {loopingType === 0 ? (
-                <Entypo name="loop" size={24} />
-              ) : loopingType === 1 ? (
-                <MaterialCommunityIcons
-                  name="numeric-1-circle-outline"
-                  size={24}
-                />
-              ) : (
-                <FontAwesome name="random" size={24} />
-              )}
+              <Entypo
+                style={{ display: loopingType === 0 ? 'flex' : 'none' }}
+                name="loop"
+                size={24}
+              />
+              <MaterialCommunityIcons
+                style={{ display: loopingType === 1 ? 'flex' : 'none' }}
+                name="numeric-1-circle-outline"
+                size={24}
+              />
+              <FontAwesome
+                style={{ display: loopingType === 2 ? 'flex' : 'none' }}
+                name="random"
+                size={24}
+              />
             </TouchableOpacity>
             <TouchableOpacity>
               <Feather name="skip-back" size={24}></Feather>
@@ -234,9 +236,9 @@ const styles = StyleSheet.create({
     margin: 20,
   },
   cover: {
-    width: DEVICE_WIDTH - 40,
-    height: DEVICE_WIDTH - 40,
-    borderRadius: (DEVICE_WIDTH - 40) / 2,
+    width: Layout.window.width - 40,
+    height: Layout.window.width - 40,
+    borderRadius: (Layout.window.width - 40) / 2,
   },
   progressBarWrapper: {
     margin: 20,

@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   View,
   GestureResponderEvent,
+  ViewStyle,
 } from 'react-native';
 import { Layout, Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
@@ -16,19 +17,17 @@ export default function PlayerBottomBar({
   togglePlay,
   onPress,
   openPlaylist,
+  style,
 }: {
   song?: Song;
   isPlaying: boolean;
   togglePlay: () => void;
   onPress: (e: GestureResponderEvent) => void;
   openPlaylist: () => void;
+  style?: ViewStyle;
 }) {
   return (
-    <TouchableOpacity
-      activeOpacity={song ? 0.2 : 1}
-      style={styles.wrapper}
-      onPress={onPress}
-    >
+    <TouchableOpacity style={[styles.wrapper, style]} onPress={onPress}>
       <Layout style={styles.container} level="2">
         <View style={styles.songWrapper}>
           <Image
@@ -52,13 +51,19 @@ export default function PlayerBottomBar({
           </View>
         </View>
         <View style={styles.buttonWrapper}>
-          <TouchableOpacity activeOpacity={song ? 0.2 : 1} onPress={togglePlay}>
+          <TouchableOpacity
+            style={{ padding: 8, paddingRight: 5 }}
+            onPress={togglePlay}
+          >
             <Feather
               name={isPlaying ? 'pause-circle' : 'play-circle'}
               size={40}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={openPlaylist}>
+          <TouchableOpacity
+            style={{ padding: 8, paddingLeft: 5 }}
+            onPress={openPlaylist}
+          >
             <Feather name="list" size={40} />
           </TouchableOpacity>
         </View>

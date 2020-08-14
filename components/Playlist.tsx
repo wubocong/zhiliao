@@ -4,11 +4,11 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
-  Dimensions,
 } from 'react-native';
-import { Layout, Text } from '@ui-kitten/components';
+import { Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 
+import Layout from '../constants/Layout';
 import { Song } from '../types';
 
 export default function Playlist({
@@ -30,15 +30,17 @@ export default function Playlist({
             <TouchableOpacity
               style={styles.songItem}
               onPress={() => playSongInPlaylist(song)}
+              key={song.id}
             >
               <Text
                 style={styles.songText}
                 status={currentSong?.id === song.id ? 'primary' : 'basic'}
               >
-                {song.name} -
+                {song.name}-
                 {song.singers.reduce(
-                  (str, singer) => `${str}&${singer.name}`,
-                  song.singers[0].name
+                  (str, singer, index) =>
+                    `${str}${index === 0 ? '' : '&'}${singer.name}`,
+                  ''
                 )}
               </Text>
               <TouchableOpacity>
@@ -58,16 +60,17 @@ export default function Playlist({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    margin: 20,
-  },
+  container: { backgroundColor: '#fff' },
   songItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
+    alignItems: 'center',
+    width: Layout.window.width - 40,
+    padding: 20,
   },
   songText: {
     overflow: 'hidden',
     width: 200,
+    fontSize: 20,
   },
 });
