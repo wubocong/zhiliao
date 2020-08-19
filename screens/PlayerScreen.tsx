@@ -69,12 +69,7 @@ export default class PlayerScreen extends React.Component<
     };
   }
   componentDidMount() {
-    if (!this.props.route.params) this.props.navigation.replace('Main');
-    else if (
-      typeof this.props.route.params.togglePlay !== 'function' ||
-      typeof this.props.route.params.setLoopingType !== 'function'
-    )
-      this.props.navigation.replace('Main');
+    if (!this.props.player.currentSong) this.props.navigation.replace('Main');
     else if (this.props.player.status.isPlaying) this.rotateAnimation.start();
   }
   _goBack = () => {
@@ -119,13 +114,9 @@ export default class PlayerScreen extends React.Component<
   };
   render() {
     // 直接访问这个页面不渲染任何东西
-    if (
-      !this.props.route.params ||
-      typeof this.props.route.params.nextSong !== 'function'
-    )
-      return null;
+    const { currentSong } = this.props.player;
+    if (!currentSong) return null;
     const { setLoopingType, openPlaylist, nextSong } = this.props.route.params;
-    const { currentSong: song } = this.props.player;
     const {
       isPlaying,
       loopingType,
@@ -143,10 +134,12 @@ export default class PlayerScreen extends React.Component<
             <Feather name="arrow-left" size={24} />
           </TouchableOpacity>
           <View style={styles.songInfo}>
-            <Text style={{ fontSize: 18 }}>{song?.name}</Text>
+            <Text style={{ fontSize: 18 }}>{currentSong?.name}</Text>
             <View style={styles.singerWrapper}>
-              <Text style={styles.singer}>{song?.singers?.[0].name}</Text>
-              {song?.singers?.slice(1).map((singer, index) => (
+              <Text style={styles.singer}>
+                {currentSong?.singers?.[0].name}
+              </Text>
+              {currentSong?.singers?.slice(1).map((singer, index) => (
                 <Text style={styles.singer} key={index}>
                   {'&' + singer.name}
                 </Text>
@@ -162,7 +155,7 @@ export default class PlayerScreen extends React.Component<
                 transform: [{ rotate: rotateDegree }],
               },
             ]}
-            source={{ uri: song?.cover }}
+            source={{ uri: currentSong?.cover }}
           />
         </View>
         <View>
@@ -185,17 +178,24 @@ export default class PlayerScreen extends React.Component<
               onPress={() => setLoopingType((loopingType + 1) % 3)}
             >
               <Entypo
-                style={{ display: loopingType === LOOPING_TYPE_ALL ? 'flex' : 'none' }}
+                style={{
+                  display: loopingType === LOOPING_TYPE_ALL ? 'flex' : 'none',
+                }}
                 name="loop"
                 size={24}
               />
               <MaterialCommunityIcons
-                style={{ display: loopingType === LOOPING_TYPE_ONE ? 'flex' : 'none' }}
+                style={{
+                  display: loopingType === LOOPING_TYPE_ONE ? 'flex' : 'none',
+                }}
                 name="numeric-1-circle-outline"
                 size={24}
               />
               <FontAwesome
-                style={{ display: loopingType === LOOPING_TYPE_RANDOM ? 'flex' : 'none' }}
+                style={{
+                  display:
+                    loopingType === LOOPING_TYPE_RANDOM ? 'flex' : 'none',
+                }}
                 name="random"
                 size={24}
               />
