@@ -11,25 +11,15 @@ import SearchTab from '../components/SearchTab';
 import Playlist from '../components/Playlist';
 import { MainStackParamList, RootStackParamList, Song } from '../types';
 import PlayerState from '../state/PlayerState';
-
-const LOOPING_TYPE_ALL = 0;
-const LOOPING_TYPE_ONE = 1;
-const LOOPING_TYPE_RANDOM = 2;
+import {
+  LOOPING_TYPE_ALL,
+  LOOPING_TYPE_ONE,
+  LOOPING_TYPE_RANDOM,
+} from '../constants/Player';
 
 type State = {
   playlistVisible: boolean;
   selectedIndex: number;
-
-  playerInstancePosition?: number;
-  playerInstanceDuration?: number;
-  shouldPlay: boolean;
-  isPlaying: boolean;
-  isBuffering: boolean;
-  rate: number;
-  isMuted: boolean;
-  volume: number;
-  loopingType: number;
-  shouldCorrectPitch: boolean;
 };
 @inject('player')
 @observer
@@ -50,17 +40,6 @@ export default class HomeScreen extends React.Component<
     this.state = {
       playlistVisible: false,
       selectedIndex: 0,
-
-      playerInstancePosition: undefined,
-      playerInstanceDuration: undefined,
-      shouldPlay: false,
-      isPlaying: false,
-      isBuffering: false,
-      rate: 1.0,
-      isMuted: false,
-      volume: 1.0,
-      loopingType: LOOPING_TYPE_ALL,
-      shouldCorrectPitch: true,
     };
   }
   componentDidMount() {
@@ -112,13 +91,20 @@ export default class HomeScreen extends React.Component<
       await this.playerInstance.unloadAsync();
       this.playerInstance = null;
     }
+    const {
+      rate,
+      isMuted,
+      volume,
+      loopingType,
+      shouldCorrectPitch,
+    } = this.props.player.status;
     const initialStatus = {
       shouldPlay: true,
-      rate: this.state.rate,
-      isMuted: this.state.isMuted,
-      volume: this.state.volume,
-      isLooping: this.state.loopingType === LOOPING_TYPE_ONE,
-      shouldCorrectPitch: this.state.shouldCorrectPitch,
+      rate: rate,
+      isMuted: isMuted,
+      volume: volume,
+      isLooping: loopingType === LOOPING_TYPE_ONE,
+      shouldCorrectPitch: shouldCorrectPitch,
       // // UNCOMMENT THIS TO TEST THE OLD androidImplementation:
       // androidImplementation: 'MediaPlayer',
     };
@@ -129,6 +115,29 @@ export default class HomeScreen extends React.Component<
     );
     this.playerInstance = sound;
   };
+  _nextSong = (forward: boolean = true) => {
+    const {
+      playlist,
+      currentSong,
+      status: { loopingType },
+    } = this.props.player;
+    const currentSongIndex = playlist.findIndex(
+      (song) => song.id === currentSong?.id
+    );
+    if (loopingType === LOOPING_TYPE_ALL || loopingType === LOOPING_TYPE_ONE) {
+      if (forward)
+        this._switchSong(playlist[(currentSongIndex + 1) % playlist.length]);
+      else
+        this._switchSong(
+          playlist[(currentSongIndex - 1 + playlist.length) % playlist.length]
+        );
+    } else if (loopingType === LOOPING_TYPE_RANDOM) {
+      let randomIndex = Math.floor(Math.random() * playlist.length);
+      if (randomIndex === currentSongIndex)
+        randomIndex = (randomIndex + 1) % playlist.length;
+      this._switchSong(playlist[randomIndex]);
+    }
+  };
   _onBackPress = () => {
     if (this.state.playlistVisible) {
       this.setState({ playlistVisible: false });
@@ -138,7 +147,7 @@ export default class HomeScreen extends React.Component<
   };
   _onPlayerStatusUpdate = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
-      const newState = {
+      const newStatus = {
         playerInstancePosition: status.positionMillis,
         playerInstanceDuration: status.durationMillis,
         shouldPlay: status.shouldPlay,
@@ -149,10 +158,10 @@ export default class HomeScreen extends React.Component<
         volume: status.volume,
         shouldCorrectPitch: status.shouldCorrectPitch,
       };
+      if (status.didJustFinish && !status.isLooping) this._nextSong();
       if (status.isLooping)
-        Object.assign(newState, { loopingType: LOOPING_TYPE_ONE });
-      this.setState(newState);
-      this.props.player.setStatus(newState);
+        Object.assign(newStatus, { loopingType: LOOPING_TYPE_ONE });
+      this.props.player.setStatus(newStatus);
     } else {
       if (status.error) {
         console.log(`FATAL PLAYER ERROR: ${status.error}`);
@@ -163,6 +172,8 @@ export default class HomeScreen extends React.Component<
     e.preventDefault(); // 防止web端点击穿透
     if (this.props.player.currentSong)
       this.props.navigation.navigate('Player', {
+        nextSong: this._nextSong,
+        openPlaylist: this._openPlaylist,
         setLoopingType: this._setLoopingType,
         setPosition: this._setPosition,
         togglePlay: this._togglePlay,
@@ -171,14 +182,14 @@ export default class HomeScreen extends React.Component<
   _openPlaylist = () => {
     this.setState({ playlistVisible: true });
   };
-  _setLoopingType = async (loopingType: number) => {
-    if (this.state.loopingType !== loopingType) {
-      if (this.state.loopingType === LOOPING_TYPE_ONE)
+  _setLoopingType = async (newLoopingType: number) => {
+    const { loopingType } = this.props.player.status;
+    if (loopingType !== newLoopingType) {
+      if (loopingType === LOOPING_TYPE_ONE)
         await this.playerInstance?.setIsLoopingAsync(false);
-      else if (loopingType === LOOPING_TYPE_ONE)
+      else if (newLoopingType === LOOPING_TYPE_ONE)
         await this.playerInstance?.setIsLoopingAsync(true);
-      this.setState({ loopingType });
-      this.props.player.setStatus({ loopingType });
+      this.props.player.setStatus({ loopingType: newLoopingType });
     }
   };
 
@@ -186,9 +197,10 @@ export default class HomeScreen extends React.Component<
     this.setState({ selectedIndex });
   };
   _setPosition = (value: number) => {
-    if (this.state.playerInstanceDuration)
+    const { playerInstanceDuration } = this.props.player.status;
+    if (playerInstanceDuration)
       this.playerInstance?.setPositionAsync(
-        Math.round(value * this.state.playerInstanceDuration)
+        Math.round(value * playerInstanceDuration)
       );
   };
   _switchSong = (song: Song) => {
@@ -200,7 +212,7 @@ export default class HomeScreen extends React.Component<
       if (this.props.player.currentSong)
         this._loadSong(this.props.player.currentSong.normal);
     } else {
-      if (this.state.isPlaying) {
+      if (this.props.player.status.isPlaying) {
         this.playerInstance.pauseAsync();
       } else {
         this.playerInstance.playAsync();
@@ -208,7 +220,11 @@ export default class HomeScreen extends React.Component<
     }
   };
   render() {
-    const { currentSong, playlist } = this.props.player;
+    const {
+      currentSong,
+      playlist,
+      status: { isPlaying, loopingType },
+    } = this.props.player;
     const { playlistVisible, selectedIndex } = this.state;
     return (
       <SafeAreaView style={styles.container}>
@@ -223,6 +239,7 @@ export default class HomeScreen extends React.Component<
           <Tab title="发现">
             <SearchTab
               addSongToPlaylistAndPlay={this._addSongToPlaylistAndPlay}
+              shouldHavePadding={playlist.length !== 0}
             />
           </Tab>
         </TabView>
@@ -232,7 +249,7 @@ export default class HomeScreen extends React.Component<
           onPress={this._openPlayer}
           togglePlay={this._togglePlay}
           openPlaylist={this._openPlaylist}
-          isPlaying={this.state.isPlaying}
+          isPlaying={isPlaying}
         />
         <Modal
           visible={playlistVisible}
@@ -241,9 +258,11 @@ export default class HomeScreen extends React.Component<
         >
           <Playlist
             currentSong={currentSong}
+            deleteSongfromPlaylist={this._deleteSongfromPlaylist}
+            loopingType={loopingType}
             playlist={playlist}
             playSongInPlaylist={this._switchSong}
-            deleteSongfromPlaylist={this._deleteSongfromPlaylist}
+            setLoopingType={this._setLoopingType}
           />
         </Modal>
       </SafeAreaView>

@@ -19,6 +19,12 @@ import Slider from '@react-native-community/slider';
 import { RootStackParamList, MainStackParamList } from '../types';
 import PlayerState from '../state/PlayerState';
 import Layout from '../constants/Layout';
+import {
+  LOOPING_TYPE_ALL,
+  LOOPING_TYPE_ONE,
+  LOOPING_TYPE_RANDOM,
+} from '../constants/Player';
+
 type State = {
   currentValue: number;
   isSliding: boolean;
@@ -112,8 +118,13 @@ export default class PlayerScreen extends React.Component<
     this.props.route.params.togglePlay();
   };
   render() {
-    if (!this.props.route.params) return null;
-    const { setLoopingType } = this.props.route.params;
+    // 直接访问这个页面不渲染任何东西
+    if (
+      !this.props.route.params ||
+      typeof this.props.route.params.nextSong !== 'function'
+    )
+      return null;
+    const { setLoopingType, openPlaylist, nextSong } = this.props.route.params;
     const { currentSong: song } = this.props.player;
     const {
       isPlaying,
@@ -174,22 +185,22 @@ export default class PlayerScreen extends React.Component<
               onPress={() => setLoopingType((loopingType + 1) % 3)}
             >
               <Entypo
-                style={{ display: loopingType === 0 ? 'flex' : 'none' }}
+                style={{ display: loopingType === LOOPING_TYPE_ALL ? 'flex' : 'none' }}
                 name="loop"
                 size={24}
               />
               <MaterialCommunityIcons
-                style={{ display: loopingType === 1 ? 'flex' : 'none' }}
+                style={{ display: loopingType === LOOPING_TYPE_ONE ? 'flex' : 'none' }}
                 name="numeric-1-circle-outline"
                 size={24}
               />
               <FontAwesome
-                style={{ display: loopingType === 2 ? 'flex' : 'none' }}
+                style={{ display: loopingType === LOOPING_TYPE_RANDOM ? 'flex' : 'none' }}
                 name="random"
                 size={24}
               />
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={nextSong.bind(null, false)}>
               <Feather name="skip-back" size={24}></Feather>
             </TouchableOpacity>
             <TouchableOpacity>
@@ -199,10 +210,10 @@ export default class PlayerScreen extends React.Component<
                 onPress={this._togglePlay}
               ></Feather>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={nextSong.bind(null, true)}>
               <Feather name="skip-forward" size={24}></Feather>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={openPlaylist}>
               <Feather name="list" size={24} />
             </TouchableOpacity>
           </View>

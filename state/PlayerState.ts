@@ -29,7 +29,7 @@ export default class PlayerState {
     isMuted: false,
     volume: 1,
     loopingType: LOOPING_TYPE_ALL,
-    shouldCorrectPitch: false,
+    shouldCorrectPitch: true,
   };
   @action setStatus = (statusObject: PlayerStatus) => {
     Object.assign(this.status, statusObject);

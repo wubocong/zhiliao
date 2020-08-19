@@ -16,8 +16,10 @@ import { Song } from '../types';
 const DEVICE_HEIGHT = Dimensions.get('window').height;
 export default function SearchTab({
   addSongToPlaylistAndPlay,
+  shouldHavePadding,
 }: {
   addSongToPlaylistAndPlay: (song: Song) => void;
+  shouldHavePadding: boolean;
 }) {
   const [inputText, onChangeInputText] = useState('');
   const [songList, setSongList] = useState([]);
@@ -35,7 +37,10 @@ export default function SearchTab({
     else Toast.show(res.message);
   };
   return (
-    <Layout level="1" style={styles.container}>
+    <Layout
+      level="1"
+      style={[styles.container, { paddingBottom: shouldHavePadding ? 80 : 0 }]}
+    >
       <Input
         style={styles.input}
         placeholder="音乐"
@@ -83,7 +88,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     height: DEVICE_HEIGHT - 54, // 不设置height web无法滚动
-    paddingBottom: 80,
   },
   input: {
     width: '100%',

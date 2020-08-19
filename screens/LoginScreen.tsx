@@ -51,7 +51,7 @@ export default function LoginScreen({
   };
   useEffect(() => {
     AsyncStorage.getItem('user_info').then((str) => {
-      if (JSON.parse(str as string).token) navigation.replace('Home');
+      if (JSON.parse(str as string)?.token) navigation.replace('Home');
     });
   }, []);
   return (
