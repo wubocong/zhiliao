@@ -77,7 +77,7 @@ export default class PlayerScreen extends React.Component<
   };
   _onSlidingComplete = (value: number) => {
     this.setState({ isSliding: false });
-    this.props.route.params.setPosition(value);
+    this.props.player.setPosition(value);
   };
   _onSlidingStart = (currentValue: number) => {
     this.setState({ isSliding: true, currentValue });
@@ -110,13 +110,14 @@ export default class PlayerScreen extends React.Component<
         );
       });
     } else this.rotateAnimation.start();
-    this.props.route.params.togglePlay();
+    this.props.player.togglePlay();
   };
   render() {
     // 直接访问这个页面不渲染任何东西
     const { currentSong } = this.props.player;
     if (!currentSong) return null;
-    const { setLoopingType, openPlaylist, nextSong } = this.props.route.params;
+    const { setLoopingType, nextSong } = this.props.player;
+    const { openPlaylist } = this.props.route.params;
     const {
       isPlaying,
       loopingType,

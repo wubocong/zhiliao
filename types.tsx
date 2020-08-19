@@ -6,11 +6,7 @@ export type MainStackParamList = {
 export type RootStackParamList = {
   NotFound: undefined;
   Player: {
-    nextSong: (forward: boolean) => void;
     openPlaylist: () => void;
-    setLoopingType: (loopingType: number) => Promise<void>;
-    setPosition: (value: number) => void;
-    togglePlay: () => void;
   };
   Main: undefined;
 };
