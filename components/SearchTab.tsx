@@ -27,19 +27,19 @@ export default function SearchTab({
     const token = JSON.parse(
       (await AsyncStorage.getItem('user_info')) as string
     ).token;
-    const res = await fetch(
+    const json = await fetch(
       `https://engine.mebtte.com/1/music/list?key=keyword&value=${encodeURI(
         inputText
       )}`,
       { headers: { Authorization: token } }
     ).then((res) => res.json());
-    if (res.code === 0) setSongList(res.data);
-    else Toast.show(res.message);
+    if (json.code === 0) setSongList(json.data);
+    else Toast.show(json.message);
   };
   return (
     <Layout
       level="1"
-      style={[styles.container, { paddingBottom: shouldHavePadding ? 80 : 0 }]}
+      style={[styles.container, { paddingBottom: shouldHavePadding ? 85 : 0 }]}
     >
       <Input
         style={styles.input}
@@ -58,8 +58,14 @@ export default function SearchTab({
         <Layout level="1">
           {songList.map((song: Song, index) => (
             <TouchableOpacity
-              key={index}
-              style={styles.songItem}
+              key={song.id}
+              style={[
+                styles.songItem,
+                {
+                  borderTopColor: '#c0c4cc',
+                  borderTopWidth: index === 0 ? 1 : 0,
+                },
+              ]}
               onPress={(e) => {
                 e.preventDefault(); // 处理 react-native-web bug
                 addSongToPlaylistAndPlay(song);
@@ -96,8 +102,8 @@ const styles = StyleSheet.create({
   songItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderTopColor: '#c0c4cc',
-    borderTopWidth: 1,
+    borderBottomColor: '#c0c4cc',
+    borderBottomWidth: 1,
     height: 60,
     paddingLeft: 10,
     paddingRight: 10,

@@ -32,7 +32,7 @@ export default function LoginScreen({
     }
   };
   const login = async () => {
-    const res = await fetch('https://engine.mebtte.com/1/user/signin', {
+    const json = await fetch('https://engine.mebtte.com/1/user/signin', {
       body: JSON.stringify({
         email,
         verify_code: captcha,
@@ -42,12 +42,11 @@ export default function LoginScreen({
       },
       method: 'POST',
     }).then((res) => res.json());
-    if (res.code !== 0) Toast.show(res.message);
-    else {
+    if (json.code === 0) {
       Toast.show('登录成功');
-      await AsyncStorage.setItem('user_info', JSON.stringify(res.data));
+      await AsyncStorage.setItem('user_info', JSON.stringify(json.data));
       navigation.replace('Home');
-    }
+    } else Toast.show(json.message);
   };
   useEffect(() => {
     AsyncStorage.getItem('user_info').then((str) => {

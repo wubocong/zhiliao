@@ -29,3 +29,11 @@ export type Song = {
   singers: Singer[];
   type: number;
 };
+export type Musicbill = {
+  cover: string;
+  create_time: string;
+  description: string;
+  id: string;
+  name: string;
+  order: number;
+};

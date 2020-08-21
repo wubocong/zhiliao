@@ -31,7 +31,7 @@ export default function Playlist({
 }) {
   return (
     <View style={styles.container}>
-      <View style={{ padding: 20 }}>
+      <View style={{ marginBottom: 20 }}>
         <Text style={{ marginBottom: 8, fontSize: 18 }}>
           当前播放({playlist.length})
         </Text>
@@ -119,7 +119,11 @@ export default function Playlist({
 }
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: '#fff' },
+  container: {
+    backgroundColor: '#fff',
+    width: Layout.window.width - 40,
+    padding: 20,
+  },
   actionBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -133,8 +137,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    width: Layout.window.width - 40,
-    padding: 20,
+    paddingTop: 5,
+    paddingBottom: 5,
   },
   songText: {
     overflow: 'hidden',

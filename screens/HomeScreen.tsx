@@ -8,6 +8,7 @@ import { inject, observer } from 'mobx-react';
 
 import PlayerBottomBar from '../components/PlayerBottomBar';
 import SearchTab from '../components/SearchTab';
+import MineTab from '../components/MineTab';
 import Playlist from '../components/Playlist';
 import { MainStackParamList, RootStackParamList, Song } from '../types';
 import PlayerState from '../state/PlayerState';
@@ -94,7 +95,7 @@ export default class HomeScreen extends React.Component<
           onSelect={this._setSelectedIndex}
         >
           <Tab title="我的">
-            <Text>1</Text>
+            <MineTab shouldHavePadding={playlist.length !== 0} />
           </Tab>
           <Tab title="发现">
             <SearchTab
@@ -103,14 +104,15 @@ export default class HomeScreen extends React.Component<
             />
           </Tab>
         </TabView>
-        <PlayerBottomBar
-          style={{ display: playlist.length === 0 ? 'none' : 'flex' }}
-          song={currentSong}
-          onPress={this._openPlayer}
-          togglePlay={togglePlay}
-          openPlaylist={this._openPlaylist}
-          isPlaying={isPlaying}
-        />
+        {playlist.length !== 0 && (
+          <PlayerBottomBar
+            song={currentSong}
+            onPress={this._openPlayer}
+            togglePlay={togglePlay}
+            openPlaylist={this._openPlaylist}
+            isPlaying={isPlaying}
+          />
+        )}
         <Modal
           visible={playlistVisible}
           backdropStyle={styles.playlistBackdrop}

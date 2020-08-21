@@ -42,11 +42,14 @@ export default class PlayerState {
     }
     this.switchSong(song);
   };
-  @action deleteSongfromPlaylist = (song: Song) => {
+  @action deleteSongfromPlaylist = async (song: Song) => {
     const { playlist, currentSong } = this;
     if (song.id === currentSong?.id) {
-      if (playlist.length === 1) this.currentSong = undefined;
-      else {
+      if (playlist.length === 1) {
+        this.currentSong = undefined;
+        await this.playerInstance?.unloadAsync();
+        this.playerInstance = null;
+      } else {
         const nextSongIndex =
           (playlist.findIndex((item) => item.id === song.id) + 1) %
           playlist.length;
