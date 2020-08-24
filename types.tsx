@@ -1,13 +1,18 @@
 export type MainStackParamList = {
   Home: undefined;
   Login: undefined;
+  Player: {
+    openPlaylist: () => void;
+  };
+  Musicbill: {
+    name: string;
+    id: string;
+    openPlaylist: () => void;
+  };
 };
 
 export type RootStackParamList = {
   NotFound: undefined;
-  Player: {
-    openPlaylist: () => void;
-  };
   Main: undefined;
 };
 export type Singer = {

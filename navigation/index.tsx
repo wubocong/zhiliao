@@ -6,6 +6,7 @@ import { ColorSchemeName } from 'react-native';
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
 import PlayerScreen from '../screens/PlayerScreen';
+import MusicbillScreen from '../screens/MusicbillScreen';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import { RootStackParamList,MainStackParamList } from '../types';
 import LinkingConfiguration from './LinkingConfiguration';
@@ -33,6 +34,8 @@ function MainNavigator() {
     <MainStack.Navigator screenOptions={{ headerShown: false }}>
       <MainStack.Screen name="Login" component={LoginScreen} />
       <MainStack.Screen name="Home" component={HomeScreen} />
+      <MainStack.Screen name="Player" component={PlayerScreen} />
+      <MainStack.Screen name="Musicbill" component={MusicbillScreen} />
     </MainStack.Navigator>
   )
 }
@@ -40,7 +43,6 @@ function RootNavigator() {
   return (
     <RootStack.Navigator screenOptions={{ headerShown: false }} mode="modal">
       <RootStack.Screen name="Main" component={MainNavigator} />
-      <RootStack.Screen name="Player" component={PlayerScreen} />
       <RootStack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
     </RootStack.Navigator>
   );

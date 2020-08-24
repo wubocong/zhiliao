@@ -1,23 +1,30 @@
+import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   TouchableOpacity,
   View,
   ScrollView,
-  Dimensions,
 } from 'react-native';
-import { Layout, Input, Text } from '@ui-kitten/components';
+import { Layout, Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-community/async-storage';
 import Toast from 'react-native-root-toast';
 
-import { Musicbill } from '../types';
+import { MainStackParamList, RootStackParamList, Musicbill } from '../types';
+import Device from '../constants/Layout';
 
-const DEVICE_HEIGHT = Dimensions.get('window').height;
 export default function SearchTab({
   shouldHavePadding,
+  navigation,
+  openPlaylist
 }: {
   shouldHavePadding: boolean;
+  navigation: StackNavigationProp<
+    MainStackParamList & RootStackParamList,
+    'Home'
+  >;
+  openPlaylist:()=>void;
 }) {
   const [musicbillList, setMusicbillList] = useState([]);
 
@@ -40,9 +47,18 @@ export default function SearchTab({
     >
       <ScrollView>
         <Layout level="1">
-          <Text>我的歌单</Text>
+          <View style={styles.musicbillHeader}>
+            <Text style={{ fontSize: 18 }}>我创建的歌单</Text>
+          </View>
           {musicbillList.map((musicbill: Musicbill, index) => (
             <TouchableOpacity
+              onPress={() => {
+                navigation.navigate('Musicbill', {
+                  name: musicbill.name,
+                  id: musicbill.id,
+                  openPlaylist
+                });
+              }}
               key={musicbill.id}
               style={[
                 styles.musicbillItem,
@@ -64,9 +80,13 @@ export default function SearchTab({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    height: DEVICE_HEIGHT - 54, // 不设置height web无法滚动
+    height: Device.window.height - 54, // 不设置height web无法滚动
     paddingLeft: 20,
     paddingRight: 20,
+  },
+  musicbillHeader: {
+    marginTop: 20,
+    marginBottom: 10,
   },
   musicbillItem: {
     flexDirection: 'row',

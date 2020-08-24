@@ -8,9 +8,10 @@ export default {
         screens: {
           Login: 'login',
           Home: 'home',
+          Player: 'player',
+          Musicbill: 'musicbill'
         },
       },
-      Player: 'player',
       NotFound: '*',
     },
   },

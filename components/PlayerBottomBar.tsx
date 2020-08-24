@@ -21,7 +21,7 @@ export default function PlayerBottomBar({
 }: {
   song?: Song;
   isPlaying: boolean;
-  togglePlay: () => void;
+  togglePlay: (e: GestureResponderEvent) => void;
   onPress: (e: GestureResponderEvent) => void;
   openPlaylist: () => void;
   style?: ViewStyle;

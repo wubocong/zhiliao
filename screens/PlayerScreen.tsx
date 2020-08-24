@@ -69,7 +69,7 @@ export default class PlayerScreen extends React.Component<
     };
   }
   componentDidMount() {
-    if (!this.props.player.currentSong) this.props.navigation.replace('Main');
+    if (!this.props.player.currentSong) this.props.navigation.replace('Home');
     else if (this.props.player.status.isPlaying) this.rotateAnimation.start();
   }
   _goBack = () => {
@@ -230,13 +230,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#fff',
   },
-  topBar: { justifyContent: 'flex-start', flexDirection: 'row' },
-  returnButton: { margin: 20 },
+  topBar: { justifyContent: 'flex-start', flexDirection: 'row', padding: 10 },
+  returnButton: { padding: 10 },
   songInfo: {
+    marginLeft: 10,
     flexDirection: 'column',
     justifyContent: 'space-around',
-    marginTop: 10,
-    marginBottom: 10,
   },
   singerWrapper: {
     flexDirection: 'row',

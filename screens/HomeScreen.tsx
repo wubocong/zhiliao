@@ -10,7 +10,7 @@ import PlayerBottomBar from '../components/PlayerBottomBar';
 import SearchTab from '../components/SearchTab';
 import MineTab from '../components/MineTab';
 import Playlist from '../components/Playlist';
-import { MainStackParamList, RootStackParamList, Song } from '../types';
+import { MainStackParamList, RootStackParamList } from '../types';
 import PlayerState from '../state/PlayerState';
 
 type State = {
@@ -73,6 +73,7 @@ export default class HomeScreen extends React.Component<
   };
 
   _setSelectedIndex = (selectedIndex: number) => {
+    console.warn(1)
     this.setState({ selectedIndex });
   };
   render() {
@@ -86,6 +87,7 @@ export default class HomeScreen extends React.Component<
       switchSong,
       togglePlay,
     } = this.props.player;
+    const { navigation } = this.props;
     const { playlistVisible, selectedIndex } = this.state;
     return (
       <SafeAreaView style={styles.container}>
@@ -95,7 +97,11 @@ export default class HomeScreen extends React.Component<
           onSelect={this._setSelectedIndex}
         >
           <Tab title="我的">
-            <MineTab shouldHavePadding={playlist.length !== 0} />
+            <MineTab
+              shouldHavePadding={playlist.length !== 0}
+              navigation={navigation}
+              openPlaylist={this._openPlaylist}
+            />
           </Tab>
           <Tab title="发现">
             <SearchTab

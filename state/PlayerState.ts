@@ -7,6 +7,7 @@ import {
   LOOPING_TYPE_ONE,
   LOOPING_TYPE_RANDOM,
 } from '../constants/Player';
+import { GestureResponderEvent } from 'react-native';
 
 type PlayerStatus = {
   playerInstancePosition?: number;
@@ -102,7 +103,8 @@ export default class PlayerState {
     this.currentSong = song;
     this._loadSong(song.normal);
   };
-  togglePlay = () => {
+  togglePlay = (e: GestureResponderEvent) => {
+    e.preventDefault();
     if (!this.playerInstance) {
       if (this.currentSong) this._loadSong(this.currentSong.normal);
     } else {

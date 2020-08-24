@@ -4,7 +4,6 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
-  Dimensions,
 } from 'react-native';
 import { Layout, Input, Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
@@ -12,8 +11,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import Toast from 'react-native-root-toast';
 
 import { Song } from '../types';
-
-const DEVICE_HEIGHT = Dimensions.get('window').height;
+import Device from '../constants/Layout';
 export default function SearchTab({
   addSongToPlaylistAndPlay,
   shouldHavePadding,
@@ -93,7 +91,7 @@ export default function SearchTab({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    height: DEVICE_HEIGHT - 54, // 不设置height web无法滚动
+    height: Device.window.height - 54, // 不设置height web无法滚动
   },
   input: {
     width: '100%',
