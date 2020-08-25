@@ -73,8 +73,8 @@ export default class HomeScreen extends React.Component<
   };
 
   _setSelectedIndex = (selectedIndex: number) => {
-    console.warn(1)
-    this.setState({ selectedIndex });
+    // react-native-web的bug，打开modal时会以NaN为参数调用这个方法
+    if (!Number.isNaN(selectedIndex)) this.setState({ selectedIndex });
   };
   render() {
     const {

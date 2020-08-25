@@ -103,8 +103,7 @@ export default class PlayerState {
     this.currentSong = song;
     this._loadSong(song.normal);
   };
-  togglePlay = (e: GestureResponderEvent) => {
-    e.preventDefault();
+  togglePlay = () => {
     if (!this.playerInstance) {
       if (this.currentSong) this._loadSong(this.currentSong.normal);
     } else {
