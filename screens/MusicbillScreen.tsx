@@ -17,6 +17,7 @@ import PlayerBottomBar from '../components/PlayerBottomBar';
 import { RootStackParamList, MainStackParamList, Song } from '../types';
 import PlayerState from '../state/PlayerState';
 import Layout from '../constants/Layout';
+import { ScrollView } from 'react-native-gesture-handler';
 
 type State = {
   songList: Song[];
@@ -46,6 +47,7 @@ export default class MusicbillScreen extends React.Component<
   }
   componentDidMount() {
     if (!this.props.route.params.name) this.props.navigation.replace('Home');
+    else this._getMusicbillDetail();
   }
   _closeTopBarMenu = () => {
     this.setState({ topBarMenuVisible: false });
@@ -64,7 +66,8 @@ export default class MusicbillScreen extends React.Component<
     else Toast.show(json.message);
   };
   _goBack = () => {
-    this.props.navigation.goBack();
+    if (this.props.navigation.canGoBack()) this.props.navigation.goBack();
+    else this.props.navigation.replace('Home');
   };
   _openPlayer = (e: GestureResponderEvent) => {
     e.preventDefault(); // 防止web端点击穿透
@@ -76,7 +79,10 @@ export default class MusicbillScreen extends React.Component<
   _openTopBarMenu = () => {
     this.setState({ topBarMenuVisible: true });
   };
-
+  _playAll = () => {
+    this.props.player.setPlaylist(this.state.songList);
+    this.props.player.switchSong(this.state.songList[0]);
+  };
   render() {
     const name = this.props.route.params?.name;
     if (!name) return null;
@@ -91,6 +97,7 @@ export default class MusicbillScreen extends React.Component<
       switchSong,
       togglePlay,
     } = this.props.player;
+    const { songList } = this.state;
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.topBar}>
@@ -141,6 +148,42 @@ export default class MusicbillScreen extends React.Component<
             </OverflowMenu>
           </View>
         </View>
+        {songList.length > 0 && (
+          <TouchableOpacity style={styles.playAll} onPress={this._playAll}>
+            <Feather
+              name="play-circle"
+              size={20}
+              color="black"
+              style={{ marginRight: 20 }}
+            />
+            <Text>播放全部(共{songList.length}首)</Text>
+          </TouchableOpacity>
+        )}
+        <ScrollView>
+          <View>
+            {songList.map((song, index) => (
+              <TouchableOpacity style={styles.songItem} key={song.id}>
+                <View style={styles.songLeft}>
+                  <Text style={styles.serial}>{index + 1}</Text>
+                  <View style={styles.songInfo}>
+                    <Text>{song.name}</Text>
+                    <Text style={styles.singer}>
+                      {song.singers.reduce(
+                        (str, singer, index) =>
+                          str + (index !== 0 ? '&' : '') + singer.name,
+                        ''
+                      )}
+                    </Text>
+                  </View>
+                </View>
+                <TouchableOpacity style={styles.songMore}>
+                  <Feather name="more-vertical" size={20} color="black" />
+                </TouchableOpacity>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
+
         {playlist.length !== 0 && (
           <PlayerBottomBar
             song={currentSong}
@@ -164,12 +207,38 @@ const styles = StyleSheet.create({
   topBar: {
     justifyContent: 'space-between',
     flexDirection: 'row',
-    padding: 10,
     alignItems: 'center',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  topBarButton: { padding: 10 },
+  topBarButton: { padding: 20 },
+  playAll: {
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  songItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  songLeft:{
+    flexDirection:'row',
+  },
+  songInfo: {
+    justifyContent: 'space-around',
+  },
+
+  serial: {
+    padding: 20,
+  },
+  singer: {
+    fontSize: 12,
+    color: '#666',
+  },
+  songMore: {
+    padding: 20,
+  },
 });

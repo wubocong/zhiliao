@@ -37,6 +37,18 @@ export default class PlayerState {
     loopingType: LOOPING_TYPE_ALL,
     shouldCorrectPitch: true,
   };
+
+  
+  @action setStatus = (statusObject: PlayerStatus) => {
+    Object.assign(this.status, statusObject);
+  };
+  @action setCurrentSong = (song: Song | undefined) => {
+    this.currentSong = song;
+  };
+  @action setPlaylist = (playlist: Song[]) => {
+    this.playlist = playlist;
+  };
+
   @action addSongToPlaylistAndPlay = (song: Song) => {
     if (!this.playlist.find((item) => item.id === song.id)) {
       this.playlist.push(song);
