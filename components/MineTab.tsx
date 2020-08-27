@@ -8,11 +8,11 @@ import {
 } from 'react-native';
 import { Layout, Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-community/async-storage';
 import Toast from 'react-native-root-toast';
 
 import { MainStackParamList, RootStackParamList, Musicbill } from '../types';
 import Device from '../constants/Layout';
+import zlFetch from '../utils/zlFetch';
 
 export default function SearchTab({
   shouldHavePadding,
@@ -30,14 +30,18 @@ export default function SearchTab({
 
   useEffect(() => {
     (async function () {
-      const token = JSON.parse(
-        (await AsyncStorage.getItem('user_info')) as string
-      ).token;
-      const json = await fetch('https://engine.mebtte.com/1/musicbill/list', {
-        headers: { Authorization: token },
-      }).then((res) => res.json());
-      if (json.code === 0) setMusicbillList(json.data);
-      else Toast.show(json.message);
+      try {
+        const data = await zlFetch(
+          'https://engine.mebtte.com/1/musicbill/list',
+          {
+            token: true,
+          },
+          navigation
+        );
+        setMusicbillList(data);
+      } catch (err) {
+        Toast.show(err.message);
+      }
     })();
   }, []);
   return (

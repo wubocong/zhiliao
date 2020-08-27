@@ -6,14 +6,15 @@ import Toast from 'react-native-root-toast';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Feather } from '@expo/vector-icons';
 
-import { MainStackParamList } from '../types';
+import { MainStackParamList, RootStackParamList } from '../types';
+import zlFetch from '../utils/zlFetch';
 
 const emailRegExp = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 const captchaRegExp = /\d{6}/;
 
 export default function LoginScreen({
   navigation,
-}: StackScreenProps<MainStackParamList, 'Login'>) {
+}: StackScreenProps<MainStackParamList & RootStackParamList, 'Login'>) {
   const [email, onChangeEmail] = useState('');
   const [captcha, onChangeCaptcha] = useState('');
   const [captchaCoolDown, setCaptchaCoolDown] = useState(true);
@@ -32,25 +33,32 @@ export default function LoginScreen({
     }
   };
   const login = async () => {
-    const json = await fetch('https://engine.mebtte.com/1/user/signin', {
-      body: JSON.stringify({
-        email,
-        verify_code: captcha,
-      }),
-      headers: {
-        'content-type': 'application/json',
-      },
-      method: 'POST',
-    }).then((res) => res.json());
-    if (json.code === 0) {
+    try {
+      const data = await zlFetch(
+        'https://engine.mebtte.com/1/user/signin',
+        {
+          body: JSON.stringify({
+            email,
+            verify_code: captcha,
+          }),
+          headers: {
+            'content-type': 'application/json',
+          },
+          method: 'POST',
+        },
+        navigation
+      );
       Toast.show('登录成功');
-      await AsyncStorage.setItem('user_info', JSON.stringify(json.data));
+      await AsyncStorage.setItem('user_info', JSON.stringify(data));
+      await AsyncStorage.setItem('token', data.token);
       navigation.replace('Home');
-    } else Toast.show(json.message);
+    } catch (err) {
+      Toast.show(err.message);
+    }
   };
   useEffect(() => {
-    AsyncStorage.getItem('user_info').then((str) => {
-      if (JSON.parse(str as string)?.token) navigation.replace('Home');
+    AsyncStorage.getItem('token').then((token) => {
+      if (token) navigation.replace('Home');
     });
   }, []);
   return (
@@ -90,7 +98,7 @@ export default function LoginScreen({
         style={[{ width: '100%' }]}
         onPress={async () => {
           if (token)
-            await AsyncStorage.setItem('user_info', JSON.stringify({ token }));
+            await AsyncStorage.setItem('token', token);
           navigation.replace('Home');
         }}
       >

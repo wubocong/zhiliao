@@ -1,38 +1,44 @@
+import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  ScrollView,
-} from 'react-native';
+import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
 import { Layout, Input, Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-community/async-storage';
 import Toast from 'react-native-root-toast';
 
+import { MainStackParamList, RootStackParamList } from '../types';
 import { Song } from '../types';
 import Device from '../constants/Layout';
+import zlFetch from '../utils/zlFetch';
+
 export default function SearchTab({
   addSongToPlaylistAndPlay,
+  navigation,
   shouldHavePadding,
 }: {
   addSongToPlaylistAndPlay: (song: Song) => void;
+  navigation: StackNavigationProp<
+    MainStackParamList & RootStackParamList,
+    'Home'
+  >;
   shouldHavePadding: boolean;
 }) {
   const [inputText, onChangeInputText] = useState('');
   const [songList, setSongList] = useState([]);
   const search = async () => {
-    const token = JSON.parse(
-      (await AsyncStorage.getItem('user_info')) as string
-    ).token;
-    const json = await fetch(
-      `https://engine.mebtte.com/1/music/list?key=keyword&value=${encodeURI(
-        inputText
-      )}`,
-      { headers: { Authorization: token } }
-    ).then((res) => res.json());
-    if (json.code === 0) setSongList(json.data);
-    else Toast.show(json.message);
+    try {
+      const data = await zlFetch(
+        `https://engine.mebtte.com/1/music/list?key=keyword&value=${encodeURI(
+          inputText
+        )}`,
+        {
+          token: true,
+        },
+        navigation
+      );
+      setSongList(data);
+    } catch (err) {
+      Toast.show(err.message);
+    }
   };
   return (
     <Layout

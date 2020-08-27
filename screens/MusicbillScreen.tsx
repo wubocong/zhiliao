@@ -11,13 +11,13 @@ import { Feather } from '@expo/vector-icons';
 import { observer, inject } from 'mobx-react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-root-toast';
-import AsyncStorage from '@react-native-community/async-storage';
 
 import PlayerBottomBar from '../components/PlayerBottomBar';
 import { RootStackParamList, MainStackParamList, Song } from '../types';
 import PlayerState from '../state/PlayerState';
 import Layout from '../constants/Layout';
 import { ScrollView } from 'react-native-gesture-handler';
+import zlFetch from '../utils/zlFetch';
 
 type State = {
   songList: Song[];
@@ -53,17 +53,18 @@ export default class MusicbillScreen extends React.Component<
     this.setState({ topBarMenuVisible: false });
   };
   _getMusicbillDetail = async () => {
-    const token = JSON.parse(
-      (await AsyncStorage.getItem('user_info')) as string
-    ).token;
-    const json = await fetch(
-      `https://engine.mebtte.com/1/musicbill?id=${this.props.route.params.id}`,
-      {
-        headers: { Authorization: token },
-      }
-    ).then((res) => res.json());
-    if (json.code === 0) this.setState({ songList: json.data.music_list });
-    else Toast.show(json.message);
+    try {
+      const data = await zlFetch(
+        `https://engine.mebtte.com/1/musicbill?id=${this.props.route.params.id}`,
+        {
+          token: true,
+        },
+        this.props.navigation
+      );
+      this.setState({ songList: data.music_list });
+    } catch (err) {
+      Toast.show(err.message);
+    }
   };
   _goBack = () => {
     if (this.props.navigation.canGoBack()) this.props.navigation.goBack();
@@ -224,8 +225,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  songLeft:{
-    flexDirection:'row',
+  songLeft: {
+    flexDirection: 'row',
   },
   songInfo: {
     justifyContent: 'space-around',

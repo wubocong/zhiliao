@@ -106,6 +106,7 @@ export default class HomeScreen extends React.Component<
           <Tab title="发现">
             <SearchTab
               addSongToPlaylistAndPlay={addSongToPlaylistAndPlay}
+              navigation={navigation}
               shouldHavePadding={playlist.length !== 0}
             />
           </Tab>
