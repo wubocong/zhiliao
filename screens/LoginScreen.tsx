@@ -20,16 +20,17 @@ export default function LoginScreen({
   const [captchaCoolDown, setCaptchaCoolDown] = useState(true);
   const [token, setToken] = useState('');
   const sendCaptcha = async () => {
-    const res = await fetch(
-      `https://engine.mebtte.com/1/verify_code?type=signin&email=${email}`
-    ).then((res) => res.json());
-    if (res.code !== 0) Toast.show(res.message);
-    else {
+    try {
+      await zlFetch(
+        `https://engine.mebtte.com/1/verify_code?type=signin&email=${email}`
+      );
       Toast.show('验证码已发送');
       setCaptchaCoolDown(false);
       setTimeout(() => {
         setCaptchaCoolDown(true);
       }, 60 * 1000);
+    } catch (err) {
+      Toast.show(err.message);
     }
   };
   const login = async () => {
@@ -97,8 +98,7 @@ export default function LoginScreen({
       <Button
         style={[{ width: '100%' }]}
         onPress={async () => {
-          if (token)
-            await AsyncStorage.setItem('token', token);
+          if (token) await AsyncStorage.setItem('token', token);
           navigation.replace('Home');
         }}
       >

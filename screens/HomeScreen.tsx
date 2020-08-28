@@ -1,8 +1,8 @@
 import { StackScreenProps } from '@react-navigation/stack';
 import React from 'react';
 import { StyleSheet, GestureResponderEvent, BackHandler } from 'react-native';
-import { Tab, TabView, Modal, Text } from '@ui-kitten/components';
-import { Audio, AVPlaybackStatus } from 'expo-av';
+import { Tab, TabView, Modal } from '@ui-kitten/components';
+import { Audio } from 'expo-av';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { inject, observer } from 'mobx-react';
 
