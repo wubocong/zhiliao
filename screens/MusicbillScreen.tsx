@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-root-toast';
 
 import PlayerBottomBar from '../components/PlayerBottomBar';
+import SongItem from '../components/SongItem';
 import { RootStackParamList, MainStackParamList, Song } from '../types';
 import PlayerState from '../state/PlayerState';
 import Layout from '../constants/Layout';
@@ -162,30 +163,17 @@ export default class MusicbillScreen extends React.Component<
         )}
         <ScrollView>
           <View>
-            {songList.map((song, index) => (
-              <TouchableOpacity style={styles.songItem} key={song.id}>
-                <View style={styles.songLeft}>
-                  <Text style={styles.serial}>{index + 1}</Text>
-                  <View style={styles.songInfo}>
-                    <Text>{song.name}</Text>
-                    <Text style={styles.singer}>
-                      {song.singers.reduce(
-                        (str, singer, index) =>
-                          str + (index !== 0 ? '&' : '') + singer.name,
-                        ''
-                      )}
-                    </Text>
-                  </View>
-                </View>
-                <TouchableOpacity style={styles.songMore}>
-                  <Feather name="more-vertical" size={20} color="black" />
-                </TouchableOpacity>
-              </TouchableOpacity>
+            {songList.map((song) => (
+              <SongItem
+                key={song.id}
+                song={song}
+                addSongToPlaylistAndPlay={addSongToPlaylistAndPlay}
+              />
             ))}
           </View>
         </ScrollView>
 
-        {playlist.length !== 0 && (
+        {currentSong && (
           <PlayerBottomBar
             song={currentSong}
             onPress={this._openPlayer}

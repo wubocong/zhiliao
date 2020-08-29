@@ -5,6 +5,7 @@ import { Layout, Input, Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-root-toast';
 
+import SongItem from '../components/SongItem';
 import { MainStackParamList, RootStackParamList } from '../types';
 import { Song } from '../types';
 import Device from '../constants/Layout';
@@ -61,32 +62,11 @@ export default function SearchTab({
       <ScrollView>
         <Layout level="1">
           {songList.map((song: Song, index) => (
-            <TouchableOpacity
+            <SongItem
               key={song.id}
-              style={[
-                styles.songItem,
-                {
-                  borderTopColor: '#c0c4cc',
-                  borderTopWidth: index === 0 ? 1 : 0,
-                },
-              ]}
-              onPress={(e) => {
-                e.preventDefault(); // 处理 react-native-web bug
-                addSongToPlaylistAndPlay(song);
-              }}
-            >
-              <View style={styles.songInfo}>
-                <Text>{song.name}</Text>
-                <View style={styles.singerWrapper}>
-                  <Text style={styles.singer}>{song.singers[0].name}</Text>
-                  {song.singers.slice(1).map((singer, index) => (
-                    <Text style={styles.singer} key={index}>
-                      {'&' + singer.name}
-                    </Text>
-                  ))}
-                </View>
-              </View>
-            </TouchableOpacity>
+              song={song}
+              addSongToPlaylistAndPlay={addSongToPlaylistAndPlay}
+            />
           ))}
         </Layout>
       </ScrollView>
@@ -102,24 +82,5 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     marginTop: 5,
-  },
-  songItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomColor: '#c0c4cc',
-    borderBottomWidth: 1,
-    height: 60,
-    paddingLeft: 10,
-    paddingRight: 10,
-  },
-  songInfo: {
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-  },
-  singerWrapper: {
-    flexDirection: 'row',
-  },
-  singer: {
-    fontSize: 12,
   },
 });

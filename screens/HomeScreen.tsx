@@ -111,7 +111,7 @@ export default class HomeScreen extends React.Component<
             />
           </Tab>
         </TabView>
-        {playlist.length !== 0 && (
+        {currentSong && (
           <PlayerBottomBar
             song={currentSong}
             onPress={this._openPlayer}

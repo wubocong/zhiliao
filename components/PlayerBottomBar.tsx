@@ -1,4 +1,4 @@
-import React, { SyntheticEvent } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   Image,
@@ -11,7 +11,7 @@ import { Layout, Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 
 import { Song } from '../types';
-export default function PlayerBottomBar({
+function PlayerBottomBar({
   song,
   isPlaying,
   togglePlay,
@@ -19,7 +19,7 @@ export default function PlayerBottomBar({
   openPlaylist,
   style,
 }: {
-  song?: Song;
+  song: Song;
   isPlaying: boolean;
   togglePlay: (e: GestureResponderEvent) => void;
   onPress: (e: GestureResponderEvent) => void;
@@ -112,3 +112,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
 });
+
+export default React.memo(PlayerBottomBar);

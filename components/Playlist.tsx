@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
 import { Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
@@ -14,7 +14,7 @@ import {
   LOOPING_TYPE_RANDOM,
 } from '../constants/Player';
 
-export default function Playlist({
+function Playlist({
   currentSong,
   deleteSongfromPlaylist,
   loopingType,
@@ -146,3 +146,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
+export default Playlist;
