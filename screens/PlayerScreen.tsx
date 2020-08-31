@@ -16,6 +16,10 @@ import { observer, inject } from 'mobx-react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
 
+import SvgButton from '../components/SvgButton';
+import LoopAll from '../components/svg/LoopAll';
+import LoopOne from '../components/svg/LoopOne';
+import LoopRandom from '../components/svg/LoopRandom';
 import { RootStackParamList, MainStackParamList } from '../types';
 import PlayerState from '../state/PlayerState';
 import Layout from '../constants/Layout';
@@ -128,6 +132,12 @@ export default class PlayerScreen extends React.Component<
       inputRange: [0, 1],
       outputRange: ['0deg', '360deg'],
     });
+    const LoopIcon =
+      loopingType === LOOPING_TYPE_ALL
+        ? LoopAll
+        : loopingType === LOOPING_TYPE_ONE
+        ? LoopOne
+        : LoopRandom;
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.topBar}>
@@ -175,32 +185,10 @@ export default class PlayerScreen extends React.Component<
             />
           </View>
           <View style={styles.controller}>
-            <TouchableOpacity
-              onPress={() => setLoopingType((loopingType + 1) % 3)}
-            >
-              <Entypo
-                style={{
-                  display: loopingType === LOOPING_TYPE_ALL ? 'flex' : 'none',
-                }}
-                name="loop"
-                size={24}
-              />
-              <MaterialCommunityIcons
-                style={{
-                  display: loopingType === LOOPING_TYPE_ONE ? 'flex' : 'none',
-                }}
-                name="numeric-1-circle-outline"
-                size={24}
-              />
-              <FontAwesome
-                style={{
-                  display:
-                    loopingType === LOOPING_TYPE_RANDOM ? 'flex' : 'none',
-                }}
-                name="random"
-                size={24}
-              />
-            </TouchableOpacity>
+            <SvgButton onPress={() => setLoopingType((loopingType + 1) % 3)}>
+              <LoopIcon />
+            </SvgButton>
+
             <TouchableOpacity onPress={nextSong.bind(null, false)}>
               <Feather name="skip-back" size={24}></Feather>
             </TouchableOpacity>
