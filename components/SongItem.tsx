@@ -50,22 +50,26 @@ function SongItem({
         <MenuItem
           title="下一首播放"
           accessoryLeft={() => (
-            <Feather name="plus-circle" size={20} color="black" />
+            <Feather name="fast-forward" size={20} color="black" />
           )}
         />
         <MenuItem
           title="收藏到歌单"
           accessoryLeft={() => (
-            <Feather name="plus-circle" size={20} color="black" />
+            <Feather name="folder-plus" size={20} color="black" />
           )}
         />
         <MenuItem
           title="下载"
-          accessoryLeft={() => <Feather name="edit" size={20} color="black" />}
+          accessoryLeft={() => (
+            <Feather name="download" size={20} color="black" />
+          )}
         />
         <MenuItem
           title="删除"
-          accessoryLeft={() => <Feather name="grid" size={20} color="black" />}
+          accessoryLeft={() => (
+            <Feather name="trash-2" size={20} color="black" />
+          )}
         />
       </OverflowMenu>
     </TouchableOpacity>

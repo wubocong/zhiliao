@@ -18,7 +18,7 @@ export default function IconButton({
   children: ReactElement;
 }) {
   return (
-    <TouchableOpacity style={[styles.default, style]}>
+    <TouchableOpacity style={[styles.default, style]} onPress={onPress}>
       {children}
     </TouchableOpacity>
   );
