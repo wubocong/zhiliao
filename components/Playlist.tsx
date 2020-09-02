@@ -2,10 +2,10 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
 import { Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
-import { Entypo } from '@expo/vector-icons';
-import { FontAwesome } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+import LoopAll from '../components/svg/LoopAll';
+import LoopOne from '../components/svg/LoopOne';
+import LoopRandom from '../components/svg/LoopRandom';
 import Layout from '../constants/Layout';
 import { Song } from '../types';
 import {
@@ -14,7 +14,7 @@ import {
   LOOPING_TYPE_RANDOM,
 } from '../constants/Player';
 
-function Playlist({
+export default function Playlist({
   currentSong,
   deleteSongfromPlaylist,
   loopingType,
@@ -47,7 +47,7 @@ function Playlist({
                 },
               ]}
             >
-              <Entypo name="loop" size={16} />
+              <LoopAll style={styles.icon} />
               <Text>列表循环</Text>
             </View>
             <View
@@ -58,11 +58,8 @@ function Playlist({
                 },
               ]}
             >
-              <MaterialCommunityIcons
-                name="numeric-1-circle-outline"
-                size={16}
-              />
-              <Text>列表循环</Text>
+              <LoopOne style={styles.icon} />
+              <Text>单曲循环</Text>
             </View>
             <View
               style={[
@@ -73,13 +70,18 @@ function Playlist({
                 },
               ]}
             >
-              <FontAwesome name="random" size={16} />
-              <Text>列表循环</Text>
+              <LoopRandom style={styles.icon} />
+              <Text>随机播放</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity>
             <View style={styles.row}>
-              <Feather name="folder-plus" size={16} color="black" />
+              <Feather
+                name="folder-plus"
+                style={{ marginRight: 4 }}
+                size={16}
+                color="black"
+              />
               <Text>收藏全部</Text>
             </View>
           </TouchableOpacity>
@@ -108,7 +110,7 @@ function Playlist({
                 )}
               </Text>
               <TouchableOpacity onPress={() => deleteSongfromPlaylist(song)}>
-                <Entypo name="cross" size={24} color="black" />
+                <Feather name="x" size={24} color="black" />
               </TouchableOpacity>
             </TouchableOpacity>
           ))}
@@ -133,6 +135,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  icon: {
+    width: 16,
+    marginRight: 4,
+  },
   songItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -146,5 +152,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-
-export default Playlist;

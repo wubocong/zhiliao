@@ -1,32 +1,31 @@
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState, useEffect } from 'react';
-import {
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  ScrollView,
-} from 'react-native';
+import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
 import { Layout, Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-root-toast';
 
 import { MainStackParamList, RootStackParamList, Musicbill } from '../types';
+import MusicbillState from '../state/MusicbillState';
 import Device from '../constants/Layout';
 import zlFetch from '../utils/zlFetch';
+import { inject, observer } from 'mobx-react';
 
-export default function SearchTab({
-  shouldHavePadding,
+function MineTab({
+  musicbill,
   navigation,
-  openPlaylist
+  openPlaylist,
+  shouldHavePadding,
 }: {
-  shouldHavePadding: boolean;
+  musicbill: MusicbillState;
   navigation: StackNavigationProp<
     MainStackParamList & RootStackParamList,
     'Home'
   >;
-  openPlaylist:()=>void;
+  openPlaylist: () => void;
+  shouldHavePadding: boolean;
 }) {
-  const [musicbillList, setMusicbillList] = useState([]);
+  const [musicbillList, setMusicbillList] = useState([]as Musicbill[]);
 
   useEffect(() => {
     (async function () {
@@ -39,6 +38,7 @@ export default function SearchTab({
           navigation
         );
         setMusicbillList(data);
+        musicbill.setMusicbillList(data);
       } catch (err) {
         Toast.show(err.message);
       }
@@ -54,13 +54,13 @@ export default function SearchTab({
           <View style={styles.musicbillHeader}>
             <Text style={{ fontSize: 18 }}>我创建的歌单</Text>
           </View>
-          {musicbillList.map((musicbill: Musicbill, index) => (
+          {musicbillList.map((musicbill, index) => (
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate('Musicbill', {
                   name: musicbill.name,
                   id: musicbill.id,
-                  openPlaylist
+                  openPlaylist,
                 });
               }}
               key={musicbill.id}
@@ -110,3 +110,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
 });
+
+export default inject('musicbill')(observer(MineTab));

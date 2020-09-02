@@ -38,6 +38,7 @@ export type Musicbill = {
   cover: string;
   create_time: string;
   description: string;
+  music_list: Song[];
   id: string;
   name: string;
   order: number;

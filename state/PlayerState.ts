@@ -7,7 +7,6 @@ import {
   LOOPING_TYPE_ONE,
   LOOPING_TYPE_RANDOM,
 } from '../constants/Player';
-import { GestureResponderEvent } from 'react-native';
 
 type PlayerStatus = {
   playerInstancePosition?: number;

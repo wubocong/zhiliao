@@ -9,14 +9,10 @@ import {
 } from 'react-native';
 import { Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
-import { Entypo } from '@expo/vector-icons';
-import { FontAwesome } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { observer, inject } from 'mobx-react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
 
-import SvgButton from '../components/SvgButton';
 import LoopAll from '../components/svg/LoopAll';
 import LoopOne from '../components/svg/LoopOne';
 import LoopRandom from '../components/svg/LoopRandom';
@@ -75,6 +71,9 @@ export default class PlayerScreen extends React.Component<
   componentDidMount() {
     if (!this.props.player.currentSong) this.props.navigation.replace('Home');
     else if (this.props.player.status.isPlaying) this.rotateAnimation.start();
+  }
+  componentDidUpdate(){
+    if (!this.props.player.currentSong) this.props.navigation.replace('Home');
   }
   _goBack = () => {
     this.props.navigation.goBack();
@@ -185,9 +184,12 @@ export default class PlayerScreen extends React.Component<
             />
           </View>
           <View style={styles.controller}>
-            <SvgButton onPress={() => setLoopingType((loopingType + 1) % 3)}>
+            <TouchableOpacity
+              style={{ width: 24 }}
+              onPress={() => setLoopingType((loopingType + 1) % 3)}
+            >
               <LoopIcon />
-            </SvgButton>
+            </TouchableOpacity>
 
             <TouchableOpacity onPress={nextSong.bind(null, false)}>
               <Feather name="skip-back" size={24}></Feather>

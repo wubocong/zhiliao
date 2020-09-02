@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { Text, MenuItem, OverflowMenu } from '@ui-kitten/components';
+import { Text, MenuItem, OverflowMenu, Modal } from '@ui-kitten/components';
+
 import { Song } from '../types';
+import { inject, observer } from 'mobx-react';
+import MusicbillState from '../state/MusicbillState';
 
 function SongItem({
-  song,
   addSongToPlaylistAndPlay,
+  openAddToMusicbillModal,
+  setCurrentSongId,
+  song,
 }: {
-  song: Song;
   addSongToPlaylistAndPlay: (song: Song) => void;
+  openAddToMusicbillModal: () => void;
+  setCurrentSongId?: typeof MusicbillState.prototype.setCurrentSongId;
+  song: Song;
 }) {
   const [menuVisible, setMenuVisible] = useState(false);
   const openMenu = () => {
@@ -58,6 +65,11 @@ function SongItem({
           accessoryLeft={() => (
             <Feather name="folder-plus" size={20} color="black" />
           )}
+          onPress={() => {
+            setCurrentSongId && setCurrentSongId(song.id);
+            closeMenu();
+            openAddToMusicbillModal();
+          }}
         />
         <MenuItem
           title="下载"
@@ -99,7 +111,6 @@ const styles = StyleSheet.create({
   },
 });
 
-export default React.memo(
-  SongItem,
-  (prevProps, nextProps) => prevProps.song.id === nextProps.song.id
-);
+export default inject((allStores: { musicbill: MusicbillState }) => ({
+  setCurrentSongId: allStores.musicbill.setCurrentSongId,
+}))(observer(SongItem));

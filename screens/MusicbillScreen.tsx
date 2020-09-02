@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   GestureResponderEvent,
 } from 'react-native';
-import { Text, MenuItem, OverflowMenu } from '@ui-kitten/components';
+import { Text, MenuItem, OverflowMenu, Modal } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 import { observer, inject } from 'mobx-react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,21 +14,25 @@ import Toast from 'react-native-root-toast';
 
 import PlayerBottomBar from '../components/PlayerBottomBar';
 import SongItem from '../components/SongItem';
+import MusicbillList from '../components/MusicbillList';
 import { RootStackParamList, MainStackParamList, Song } from '../types';
 import PlayerState from '../state/PlayerState';
+import MusicbillState from '../state/MusicbillState';
 import Layout from '../constants/Layout';
 import { ScrollView } from 'react-native-gesture-handler';
 import zlFetch from '../utils/zlFetch';
 
 type State = {
+  addToMusicbillModalVisible: boolean;
   songList: Song[];
   topBarMenuVisible: boolean;
 };
-@inject('player')
+@inject('player', 'musicbill')
 @observer
 export default class MusicbillScreen extends React.Component<
   StackScreenProps<RootStackParamList & MainStackParamList, 'Musicbill'> & {
     player: PlayerState;
+    musicbill: MusicbillState;
   },
   State
 > {
@@ -38,10 +42,12 @@ export default class MusicbillScreen extends React.Component<
       'Musicbill'
     > & {
       player: PlayerState;
+      musicbill: MusicbillState;
     }
   ) {
     super(props);
     this.state = {
+      addToMusicbillModalVisible: false,
       songList: [],
       topBarMenuVisible: false,
     };
@@ -50,6 +56,9 @@ export default class MusicbillScreen extends React.Component<
     if (!this.props.route.params.name) this.props.navigation.replace('Home');
     else this._getMusicbillDetail();
   }
+  _closeAddToMusicbillModal = () => {
+    this.setState({ addToMusicbillModalVisible: false });
+  };
   _closeTopBarMenu = () => {
     this.setState({ topBarMenuVisible: false });
   };
@@ -63,6 +72,7 @@ export default class MusicbillScreen extends React.Component<
         this.props.navigation
       );
       this.setState({ songList: data.music_list });
+      this.props.musicbill.mergeOneMusicbill(this.props.route.params.id, data);
     } catch (err) {
       Toast.show(err.message);
     }
@@ -70,6 +80,9 @@ export default class MusicbillScreen extends React.Component<
   _goBack = () => {
     if (this.props.navigation.canGoBack()) this.props.navigation.goBack();
     else this.props.navigation.replace('Home');
+  };
+  _openAddToMusicbillModal = () => {
+    this.setState({ addToMusicbillModalVisible: true });
   };
   _openPlayer = (e: GestureResponderEvent) => {
     e.preventDefault(); // 防止web端点击穿透
@@ -92,14 +105,11 @@ export default class MusicbillScreen extends React.Component<
     const {
       addSongToPlaylistAndPlay,
       currentSong,
-      deleteSongfromPlaylist,
-      playlist,
-      setLoopingType,
-      status: { isPlaying, loopingType },
-      switchSong,
+      status: { isPlaying },
       togglePlay,
     } = this.props.player;
-    const { songList } = this.state;
+    const { currentSongId, musicbillList } = this.props.musicbill;
+    const { addToMusicbillModalVisible, songList } = this.state;
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.topBar}>
@@ -168,6 +178,7 @@ export default class MusicbillScreen extends React.Component<
                 key={song.id}
                 song={song}
                 addSongToPlaylistAndPlay={addSongToPlaylistAndPlay}
+                openAddToMusicbillModal={this._openAddToMusicbillModal}
               />
             ))}
           </View>
@@ -182,6 +193,16 @@ export default class MusicbillScreen extends React.Component<
             isPlaying={isPlaying}
           />
         )}
+        <Modal
+          visible={addToMusicbillModalVisible}
+          backdropStyle={styles.backdrop}
+          onBackdropPress={this._closeAddToMusicbillModal}
+        >
+          <MusicbillList
+            musicbillList={musicbillList}
+            currentSongId={currentSongId}
+          />
+        </Modal>
       </SafeAreaView>
     );
   }
@@ -229,5 +250,9 @@ const styles = StyleSheet.create({
   },
   songMore: {
     padding: 20,
+  },
+
+  backdrop: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
 });

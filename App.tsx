@@ -10,8 +10,10 @@ import useCachedResources from './hooks/useCachedResources';
 import useColorScheme from './hooks/useColorScheme';
 import Navigation from './navigation';
 import PlayerState from './state/PlayerState';
+import MusicbillState from './state/MusicbillState';
 
 const player = new PlayerState();
+const musicbill = new MusicbillState();
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
@@ -23,7 +25,7 @@ export default function App() {
       <SafeAreaProvider>
         <ApplicationProvider {...eva} theme={eva.light}>
           <RootSiblingParent>
-            <Provider player={player}>
+            <Provider player={player} musicbill={musicbill}>
               <Navigation colorScheme={colorScheme} />
               <StatusBar />
             </Provider>
