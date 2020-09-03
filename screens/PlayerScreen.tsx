@@ -18,7 +18,7 @@ import LoopOne from '../components/svg/LoopOne';
 import LoopRandom from '../components/svg/LoopRandom';
 import { RootStackParamList, MainStackParamList } from '../types';
 import PlayerState from '../state/PlayerState';
-import Layout from '../constants/Layout';
+import Layout from '../constants/Device';
 import {
   LOOPING_TYPE_ALL,
   LOOPING_TYPE_ONE,

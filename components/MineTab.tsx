@@ -7,7 +7,7 @@ import Toast from 'react-native-root-toast';
 
 import { MainStackParamList, RootStackParamList, Musicbill } from '../types';
 import MusicbillState from '../state/MusicbillState';
-import Device from '../constants/Layout';
+import Device from '../constants/Device';
 import zlFetch from '../utils/zlFetch';
 import { inject, observer } from 'mobx-react';
 
@@ -25,7 +25,7 @@ function MineTab({
   openPlaylist: () => void;
   shouldHavePadding: boolean;
 }) {
-  const [musicbillList, setMusicbillList] = useState([]as Musicbill[]);
+  const [musicbillList, setMusicbillList] = useState([] as Musicbill[]);
 
   useEffect(() => {
     (async function () {

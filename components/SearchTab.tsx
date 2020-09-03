@@ -1,22 +1,27 @@
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState } from 'react';
 import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
-import { Layout, Input, Text } from '@ui-kitten/components';
+import { Layout, Input, Text, Modal } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-root-toast';
 
-import SongItem from '../components/SongItem';
+import SongItem from './SongItem';
+import MusicbillList from './MusicbillList';
 import { MainStackParamList, RootStackParamList } from '../types';
 import { Song } from '../types';
-import Device from '../constants/Layout';
+import MusicbillState from '../state/MusicbillState';
+import Device from '../constants/Device';
 import zlFetch from '../utils/zlFetch';
+import { inject, observer } from 'mobx-react';
 
-export default function SearchTab({
+function SearchTab({
   addSongToPlaylistAndPlay,
+  musicbill,
   navigation,
   shouldHavePadding,
 }: {
   addSongToPlaylistAndPlay: (song: Song) => void;
+  musicbill: MusicbillState;
   navigation: StackNavigationProp<
     MainStackParamList & RootStackParamList,
     'Home'
@@ -25,6 +30,9 @@ export default function SearchTab({
 }) {
   const [inputText, onChangeInputText] = useState('');
   const [songList, setSongList] = useState([]);
+  const [addToMusicbillModalVisible, setAddToMusicbillModalVisible] = useState(
+    false
+  );
   const search = async () => {
     try {
       const data = await zlFetch(
@@ -40,6 +48,12 @@ export default function SearchTab({
     } catch (err) {
       Toast.show(err.message);
     }
+  };
+  const openAddToMusicbillModal = () => {
+    setAddToMusicbillModalVisible(true);
+  };
+  const closeAddToMusicbillModal = () => {
+    setAddToMusicbillModalVisible(true);
   };
   return (
     <Layout
@@ -66,14 +80,25 @@ export default function SearchTab({
               key={song.id}
               song={song}
               addSongToPlaylistAndPlay={addSongToPlaylistAndPlay}
+              openAddToMusicbillModal={openAddToMusicbillModal}
             />
           ))}
         </Layout>
       </ScrollView>
+      <Modal
+        visible={addToMusicbillModalVisible}
+        backdropStyle={styles.backdrop}
+        onBackdropPress={closeAddToMusicbillModal}
+      >
+        <MusicbillList
+          musicbillList={musicbill.musicbillList}
+          currentSongId={musicbill.operatingSong?.id}
+          closeAddToMusicbillModal={closeAddToMusicbillModal}
+        />
+      </Modal>
     </Layout>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -83,4 +108,9 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 5,
   },
+  backdrop: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
 });
+
+export default inject('musicbill')(observer(SearchTab));

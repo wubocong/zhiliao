@@ -6,7 +6,7 @@ import { Feather } from '@expo/vector-icons';
 import LoopAll from '../components/svg/LoopAll';
 import LoopOne from '../components/svg/LoopOne';
 import LoopRandom from '../components/svg/LoopRandom';
-import Layout from '../constants/Layout';
+import Layout from '../constants/Device';
 import { Song } from '../types';
 import {
   LOOPING_TYPE_ALL,

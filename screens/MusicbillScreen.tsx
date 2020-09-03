@@ -18,7 +18,6 @@ import MusicbillList from '../components/MusicbillList';
 import { RootStackParamList, MainStackParamList, Song } from '../types';
 import PlayerState from '../state/PlayerState';
 import MusicbillState from '../state/MusicbillState';
-import Layout from '../constants/Layout';
 import { ScrollView } from 'react-native-gesture-handler';
 import zlFetch from '../utils/zlFetch';
 
@@ -108,7 +107,7 @@ export default class MusicbillScreen extends React.Component<
       status: { isPlaying },
       togglePlay,
     } = this.props.player;
-    const { currentSongId, musicbillList } = this.props.musicbill;
+    const { operatingSong, musicbillList } = this.props.musicbill;
     const { addToMusicbillModalVisible, songList } = this.state;
     return (
       <SafeAreaView style={styles.container}>
@@ -179,6 +178,7 @@ export default class MusicbillScreen extends React.Component<
                 song={song}
                 addSongToPlaylistAndPlay={addSongToPlaylistAndPlay}
                 openAddToMusicbillModal={this._openAddToMusicbillModal}
+                currentMusicbillId={this.props.route.params.id}
               />
             ))}
           </View>
@@ -200,7 +200,8 @@ export default class MusicbillScreen extends React.Component<
         >
           <MusicbillList
             musicbillList={musicbillList}
-            currentSongId={currentSongId}
+            currentSongId={operatingSong?.id}
+            closeAddToMusicbillModal={this._closeAddToMusicbillModal}
           />
         </Modal>
       </SafeAreaView>
@@ -251,7 +252,6 @@ const styles = StyleSheet.create({
   songMore: {
     padding: 20,
   },
-
   backdrop: {
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
