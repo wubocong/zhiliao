@@ -43,7 +43,7 @@ export default function LoginScreen({
             verify_code: captcha,
           }),
           headers: {
-            'content-type': 'application/json',
+            'Content-Type': 'application/json',
           },
           method: 'POST',
         },

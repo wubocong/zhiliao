@@ -23,14 +23,14 @@ export default function App() {
   } else {
     return (
       <SafeAreaProvider>
-        <ApplicationProvider {...eva} theme={eva.light}>
+        <Provider player={player} musicbill={musicbill}>
           <RootSiblingParent>
-            <Provider player={player} musicbill={musicbill}>
+            <ApplicationProvider {...eva} theme={eva.light}>
               <Navigation colorScheme={colorScheme} />
               <StatusBar />
-            </Provider>
+            </ApplicationProvider>
           </RootSiblingParent>
-        </ApplicationProvider>
+        </Provider>
       </SafeAreaProvider>
     );
   }

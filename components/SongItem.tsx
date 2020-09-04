@@ -12,19 +12,19 @@ import MusicbillState from '../state/MusicbillState';
 function SongItem({
   addSongToPlaylistAndPlay,
   currentMusicbillId,
+  musicbill,
   openAddToMusicbillModal,
-  setOperatingSong,
   song,
 }: {
   addSongToPlaylistAndPlay: (song: Song) => void;
   currentMusicbillId?: string;
+  musicbill: MusicbillState;
   openAddToMusicbillModal: () => void;
-  setOperatingSong: typeof MusicbillState.prototype.setOperatingSong;
   song: Song;
 }) {
   const [menuVisible, setMenuVisible] = useState(false);
   const openMenu = () => {
-    setOperatingSong(song);
+    musicbill.setOperatingSong(song);
     setMenuVisible(true);
   };
   const closeMenu = () => {
@@ -97,6 +97,7 @@ function SongItem({
                   method: 'DELETE',
                 }
               );
+              musicbill.deleteSongFromMusicbill(song, currentMusicbillId as string);
             } catch (err) {
               Toast.show(err.message);
             }
@@ -130,6 +131,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default inject((allStores: { musicbill: MusicbillState }) => ({
-  setOperatingSong: allStores.musicbill.setOperatingSong,
-}))(observer(SongItem));
+export default inject('musicbill')(observer(SongItem));

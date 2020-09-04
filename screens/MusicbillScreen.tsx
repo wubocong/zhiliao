@@ -11,6 +11,8 @@ import { Feather } from '@expo/vector-icons';
 import { observer, inject } from 'mobx-react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-root-toast';
+import 'mobx-react-lite/batchingForReactDom';
+import 'mobx-react-lite/batchingForReactNative';
 
 import PlayerBottomBar from '../components/PlayerBottomBar';
 import SongItem from '../components/SongItem';
@@ -107,8 +109,12 @@ export default class MusicbillScreen extends React.Component<
       status: { isPlaying },
       togglePlay,
     } = this.props.player;
-    const { operatingSong, musicbillList } = this.props.musicbill;
-    const { addToMusicbillModalVisible, songList } = this.state;
+    const { musicbillList } = this.props.musicbill;
+    const currentMusicbillId = this.props.route.params.id;
+    const { addToMusicbillModalVisible } = this.state;
+    const songList = musicbillList.find(
+      (musicbill) => musicbill.id === currentMusicbillId
+    )?.music_list;
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.topBar}>
@@ -159,7 +165,7 @@ export default class MusicbillScreen extends React.Component<
             </OverflowMenu>
           </View>
         </View>
-        {songList.length > 0 && (
+        {songList && (
           <TouchableOpacity style={styles.playAll} onPress={this._playAll}>
             <Feather
               name="play-circle"
@@ -172,13 +178,13 @@ export default class MusicbillScreen extends React.Component<
         )}
         <ScrollView>
           <View>
-            {songList.map((song) => (
+            {songList?.map((song) => (
               <SongItem
                 key={song.id}
                 song={song}
                 addSongToPlaylistAndPlay={addSongToPlaylistAndPlay}
                 openAddToMusicbillModal={this._openAddToMusicbillModal}
-                currentMusicbillId={this.props.route.params.id}
+                currentMusicbillId={currentMusicbillId}
               />
             ))}
           </View>
@@ -199,8 +205,6 @@ export default class MusicbillScreen extends React.Component<
           onBackdropPress={this._closeAddToMusicbillModal}
         >
           <MusicbillList
-            musicbillList={musicbillList}
-            currentSongId={operatingSong?.id}
             closeAddToMusicbillModal={this._closeAddToMusicbillModal}
           />
         </Modal>

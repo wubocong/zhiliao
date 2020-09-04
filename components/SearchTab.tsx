@@ -9,19 +9,15 @@ import SongItem from './SongItem';
 import MusicbillList from './MusicbillList';
 import { MainStackParamList, RootStackParamList } from '../types';
 import { Song } from '../types';
-import MusicbillState from '../state/MusicbillState';
 import Device from '../constants/Device';
 import zlFetch from '../utils/zlFetch';
-import { inject, observer } from 'mobx-react';
 
 function SearchTab({
   addSongToPlaylistAndPlay,
-  musicbill,
   navigation,
   shouldHavePadding,
 }: {
   addSongToPlaylistAndPlay: (song: Song) => void;
-  musicbill: MusicbillState;
   navigation: StackNavigationProp<
     MainStackParamList & RootStackParamList,
     'Home'
@@ -53,7 +49,7 @@ function SearchTab({
     setAddToMusicbillModalVisible(true);
   };
   const closeAddToMusicbillModal = () => {
-    setAddToMusicbillModalVisible(true);
+    setAddToMusicbillModalVisible(false);
   };
   return (
     <Layout
@@ -90,11 +86,7 @@ function SearchTab({
         backdropStyle={styles.backdrop}
         onBackdropPress={closeAddToMusicbillModal}
       >
-        <MusicbillList
-          musicbillList={musicbill.musicbillList}
-          currentSongId={musicbill.operatingSong?.id}
-          closeAddToMusicbillModal={closeAddToMusicbillModal}
-        />
+        <MusicbillList closeAddToMusicbillModal={closeAddToMusicbillModal} />
       </Modal>
     </Layout>
   );
@@ -113,4 +105,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default inject('musicbill')(observer(SearchTab));
+export default SearchTab;
