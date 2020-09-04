@@ -6,8 +6,9 @@ import Toast from 'react-native-root-toast';
 import AsyncStorage from '@react-native-community/async-storage';
 import { Feather } from '@expo/vector-icons';
 
-import { MainStackParamList, RootStackParamList } from '../types';
+import { MainStackParamList, RootStackParamList, Musicbill } from '../types';
 import zlFetch from '../utils/zlFetch';
+import useStores from '../hooks/useStores';
 
 const emailRegExp = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 const captchaRegExp = /\d{6}/;
@@ -19,6 +20,7 @@ export default function LoginScreen({
   const [captcha, onChangeCaptcha] = useState('');
   const [captchaCoolDown, setCaptchaCoolDown] = useState(true);
   const [token, setToken] = useState('');
+  const { musicbillStore } = useStores();
   const sendCaptcha = async () => {
     try {
       await zlFetch(
@@ -50,8 +52,36 @@ export default function LoginScreen({
         navigation
       );
       Toast.show('登录成功');
-      await AsyncStorage.setItem('user_info', JSON.stringify(data));
-      await AsyncStorage.setItem('token', data.token);
+      await Promise.all([
+        zlFetch('https://engine.mebtte.com/1/musicbill/list', {
+          token: data.token,
+        })
+          .then((musicbillList: Musicbill[]) => {
+            musicbillStore.setMusicbillList(musicbillList);
+            musicbillList.forEach((musicbill) => {
+              zlFetch(
+                `https://engine.mebtte.com/1/musicbill?id=${musicbill.id}`,
+                {
+                  token: data.token,
+                }
+              )
+                .then((musicbillDetail) => {
+                  musicbillStore.mergeOneMusicbill(
+                    musicbill.id,
+                    musicbillDetail
+                  );
+                })
+                .catch((err) => {
+                  Toast.show(err.message);
+                });
+            });
+          })
+          .catch((err) => {
+            Toast.show(err.message);
+          }),
+        AsyncStorage.setItem('user_info', JSON.stringify(data)),
+        AsyncStorage.setItem('token', data.token),
+      ]);
       navigation.replace('Home');
     } catch (err) {
       Toast.show(err.message);

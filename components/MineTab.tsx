@@ -23,7 +23,6 @@ function MineTab({
   openPlaylist: () => void;
   shouldHavePadding: boolean;
 }) {
-  const [musicbillList, setMusicbillList] = useState([] as Musicbill[]);
   const { musicbillStore } = useStores();
   useEffect(() => {
     (async function () {
@@ -35,7 +34,6 @@ function MineTab({
           },
           navigation
         );
-        setMusicbillList(data);
         musicbillStore.setMusicbillList(data);
       } catch (err) {
         Toast.show(err.message);
@@ -52,7 +50,7 @@ function MineTab({
           <View style={styles.musicbillHeader}>
             <Text style={{ fontSize: 18 }}>我创建的歌单</Text>
           </View>
-          {musicbillList.map((musicbill, index) => (
+          {musicbillStore.musicbillList.map((musicbill, index) => (
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate('Musicbill', {

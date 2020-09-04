@@ -47,7 +47,7 @@ export default class MusicbillScreen extends React.Component<
   }
   componentDidMount() {
     if (!this.props.route.params.name) this.props.navigation.replace('Home');
-    else this._getMusicbillDetail();
+    // else this._getMusicbillDetail();
   }
   _closeAddToMusicbillModal = () => {
     this.setState({ addToMusicbillModalVisible: false });

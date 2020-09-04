@@ -11,7 +11,10 @@ export default async function (
 ) {
   const optionsLocal = Object.assign({}, options);
   if (optionsLocal.token) {
-    const token = await AsyncStorage.getItem('token');
+    const token =
+      optionsLocal.token === true
+        ? await AsyncStorage.getItem('token')
+        : optionsLocal.token;
     if (token) {
       if (typeof optionsLocal.headers === 'object')
         Object.assign(optionsLocal.headers, { Authorization: token });
