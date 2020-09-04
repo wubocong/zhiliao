@@ -2,7 +2,7 @@ import { observable, action } from 'mobx';
 
 import { Song, Musicbill } from '../types';
 
-export default class MusicbillState {
+export default class MusicbillStore {
   @observable musicbillList: Musicbill[] = [];
   @observable operatingSong?: Song;
   @action setMusicbillList = (musicbillList: Musicbill[]) => {

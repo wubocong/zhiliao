@@ -2,29 +2,28 @@ import React, { useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { Text, MenuItem, OverflowMenu } from '@ui-kitten/components';
-import { inject, observer } from 'mobx-react';
+import { observer } from 'mobx-react';
 import Toast from 'react-native-root-toast';
 
 import { Song } from '../types';
 import zlFetch from '../utils/zlFetch';
-import MusicbillState from '../state/MusicbillState';
+import useStores from '../hooks/useStores';
 
 function SongItem({
   addSongToPlaylistAndPlay,
   currentMusicbillId,
-  musicbill,
   openAddToMusicbillModal,
   song,
 }: {
   addSongToPlaylistAndPlay: (song: Song) => void;
   currentMusicbillId?: string;
-  musicbill: MusicbillState;
   openAddToMusicbillModal: () => void;
   song: Song;
 }) {
+  const { musicbillStore } = useStores();
   const [menuVisible, setMenuVisible] = useState(false);
   const openMenu = () => {
-    musicbill.setOperatingSong(song);
+    musicbillStore.setOperatingSong(song);
     setMenuVisible(true);
   };
   const closeMenu = () => {
@@ -97,7 +96,7 @@ function SongItem({
                   method: 'DELETE',
                 }
               );
-              musicbill.deleteSongFromMusicbill(song, currentMusicbillId as string);
+              musicbillStore.deleteSongFromMusicbill(song, currentMusicbillId as string);
             } catch (err) {
               Toast.show(err.message);
             }
@@ -131,4 +130,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default inject('musicbill')(observer(SongItem));
+export default observer(SongItem);

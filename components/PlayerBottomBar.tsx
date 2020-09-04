@@ -9,40 +9,37 @@ import {
 } from 'react-native';
 import { Layout, Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
+import { observer } from 'mobx-react';
 
-import { Song } from '../types';
+import useStores from '../hooks/useStores';
+
 function PlayerBottomBar({
-  song,
-  isPlaying,
-  togglePlay,
   onPress,
   openPlaylist,
   style,
 }: {
-  song: Song;
-  isPlaying: boolean;
-  togglePlay: (e: GestureResponderEvent) => void;
   onPress: (e: GestureResponderEvent) => void;
   openPlaylist: () => void;
   style?: ViewStyle;
 }) {
-  return (
+  const {
+    playerStore: {
+      currentSong,
+      togglePlay,
+      status: { isPlaying },
+    },
+  } = useStores();
+
+  return currentSong ? (
     <TouchableOpacity style={[styles.wrapper, style]} onPress={onPress}>
       <Layout style={styles.container} level="2">
         <View style={styles.songWrapper}>
-          <Image
-            style={styles.cover}
-            source={
-              song
-                ? { uri: song?.cover }
-                : require('../assets/images/default-music-logo.webp')
-            }
-          />
+          <Image style={styles.cover} source={{ uri: currentSong.cover }} />
           <View style={styles.songInfo}>
-            <Text>{song?.name}</Text>
+            <Text>{currentSong.name}</Text>
             <View style={styles.singerWrapper}>
-              <Text style={styles.singer}>{song?.singers[0].name}</Text>
-              {song?.singers.slice(1).map((singer, index) => (
+              <Text style={styles.singer}>{currentSong.singers[0].name}</Text>
+              {currentSong.singers.slice(1).map((singer, index) => (
                 <Text style={styles.singer} key={index}>
                   {'&' + singer.name}
                 </Text>
@@ -69,7 +66,7 @@ function PlayerBottomBar({
         </View>
       </Layout>
     </TouchableOpacity>
-  );
+  ) : null;
 }
 
 const styles = StyleSheet.create({
@@ -113,4 +110,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default React.memo(PlayerBottomBar);
+export default observer(PlayerBottomBar);

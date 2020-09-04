@@ -1,9 +1,9 @@
 import React from 'react';
-import { Svg, Path } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import { ViewStyle } from 'react-native';
 
 export default function LoopRandom({
-  color = '000000',
+  color = '#000000',
   style,
 }: {
   color?: string;

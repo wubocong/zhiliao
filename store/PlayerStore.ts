@@ -20,7 +20,7 @@ type PlayerStatus = {
   loopingType?: number;
   shouldCorrectPitch?: boolean;
 };
-export default class PlayerState {
+export default class PlayerStore {
   playerInstance: Audio.Sound | null = null;
   @observable playlist: Song[] = [];
   @observable currentSong?: Song;

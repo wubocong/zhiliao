@@ -4,20 +4,18 @@ import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
 import { Layout, Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-root-toast';
+import { observer } from 'mobx-react';
 
 import { MainStackParamList, RootStackParamList, Musicbill } from '../types';
-import MusicbillState from '../state/MusicbillState';
 import Device from '../constants/Device';
 import zlFetch from '../utils/zlFetch';
-import { inject, observer } from 'mobx-react';
+import useStores from '../hooks/useStores';
 
 function MineTab({
-  musicbill,
   navigation,
   openPlaylist,
   shouldHavePadding,
 }: {
-  musicbill: MusicbillState;
   navigation: StackNavigationProp<
     MainStackParamList & RootStackParamList,
     'Home'
@@ -26,7 +24,7 @@ function MineTab({
   shouldHavePadding: boolean;
 }) {
   const [musicbillList, setMusicbillList] = useState([] as Musicbill[]);
-
+  const { musicbillStore } = useStores();
   useEffect(() => {
     (async function () {
       try {
@@ -38,7 +36,7 @@ function MineTab({
           navigation
         );
         setMusicbillList(data);
-        musicbill.setMusicbillList(data);
+        musicbillStore.setMusicbillList(data);
       } catch (err) {
         Toast.show(err.message);
       }
@@ -111,4 +109,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default inject('musicbill')(observer(MineTab));
+export default observer(MineTab);

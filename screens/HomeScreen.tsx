@@ -4,31 +4,28 @@ import { StyleSheet, GestureResponderEvent, BackHandler } from 'react-native';
 import { Tab, TabView, Modal } from '@ui-kitten/components';
 import { Audio } from 'expo-av';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { inject, observer } from 'mobx-react';
+import { observer } from 'mobx-react';
 
 import PlayerBottomBar from '../components/PlayerBottomBar';
 import SearchTab from '../components/SearchTab';
 import MineTab from '../components/MineTab';
 import Playlist from '../components/Playlist';
 import { MainStackParamList, RootStackParamList } from '../types';
-import PlayerState from '../state/PlayerState';
+import storesContext from '../store';
 
 type State = {
   playlistVisible: boolean;
   selectedIndex: number;
 };
-@inject('player')
 @observer
 export default class HomeScreen extends React.Component<
-  StackScreenProps<MainStackParamList & RootStackParamList, 'Home'> & {
-    player: PlayerState;
-  },
+  StackScreenProps<MainStackParamList & RootStackParamList, 'Home'>,
   State
 > {
+  static contextType = storesContext;
+  context!: React.ContextType<typeof storesContext>;
   constructor(
-    props: StackScreenProps<MainStackParamList & RootStackParamList, 'Home'> & {
-      player: PlayerState;
-    }
+    props: StackScreenProps<MainStackParamList & RootStackParamList, 'Home'>
   ) {
     super(props);
     this.state = {
@@ -63,7 +60,8 @@ export default class HomeScreen extends React.Component<
   };
   _openPlayer = (e: GestureResponderEvent) => {
     e.preventDefault(); // 防止web端点击穿透
-    if (this.props.player.currentSong)
+    const { currentSong } = this.context.playerStore;
+    if (currentSong)
       this.props.navigation.navigate('Player', {
         openPlaylist: this._openPlaylist,
       });
@@ -79,14 +77,8 @@ export default class HomeScreen extends React.Component<
   render() {
     const {
       addSongToPlaylistAndPlay,
-      currentSong,
-      deleteSongfromPlaylist,
       playlist,
-      setLoopingType,
-      status: { isPlaying, loopingType },
-      switchSong,
-      togglePlay,
-    } = this.props.player;
+    } = this.context.playerStore;
     const { navigation } = this.props;
     const { playlistVisible, selectedIndex } = this.state;
     return (
@@ -111,28 +103,16 @@ export default class HomeScreen extends React.Component<
             />
           </Tab>
         </TabView>
-        {currentSong && (
-          <PlayerBottomBar
-            song={currentSong}
-            onPress={this._openPlayer}
-            togglePlay={togglePlay}
-            openPlaylist={this._openPlaylist}
-            isPlaying={isPlaying}
-          />
-        )}
+        <PlayerBottomBar
+          onPress={this._openPlayer}
+          openPlaylist={this._openPlaylist}
+        />
         <Modal
           visible={playlistVisible}
           backdropStyle={styles.playlistBackdrop}
           onBackdropPress={this._closePlaylist}
         >
-          <Playlist
-            currentSong={currentSong}
-            deleteSongfromPlaylist={deleteSongfromPlaylist}
-            loopingType={loopingType}
-            playlist={playlist}
-            playSongInPlaylist={switchSong}
-            setLoopingType={setLoopingType}
-          />
+          <Playlist />
         </Modal>
       </SafeAreaView>
     );

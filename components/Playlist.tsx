@@ -2,33 +2,30 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
 import { Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
+import { observer } from 'mobx-react';
 
 import LoopAll from '../components/svg/LoopAll';
 import LoopOne from '../components/svg/LoopOne';
 import LoopRandom from '../components/svg/LoopRandom';
 import Layout from '../constants/Device';
-import { Song } from '../types';
 import {
   LOOPING_TYPE_ALL,
   LOOPING_TYPE_ONE,
   LOOPING_TYPE_RANDOM,
 } from '../constants/Player';
+import useStores from '../hooks/useStores';
 
-export default function Playlist({
-  currentSong,
-  deleteSongfromPlaylist,
-  loopingType,
-  playlist,
-  playSongInPlaylist,
-  setLoopingType,
-}: {
-  currentSong?: Song;
-  deleteSongfromPlaylist: (song: Song) => void;
-  loopingType: number;
-  playlist: Song[];
-  playSongInPlaylist: (song: Song) => void;
-  setLoopingType: (loopingType: number) => void;
-}) {
+function Playlist() {
+  const {
+    playerStore: {
+      currentSong,
+      deleteSongfromPlaylist,
+      playlist,
+      setLoopingType,
+      status: { loopingType },
+      switchSong,
+    },
+  } = useStores();
   return (
     <View style={styles.container}>
       <View style={{ marginBottom: 20 }}>
@@ -95,7 +92,7 @@ export default function Playlist({
           {playlist.map((song) => (
             <TouchableOpacity
               style={styles.songItem}
-              onPress={() => playSongInPlaylist(song)}
+              onPress={() => switchSong(song)}
               key={song.id}
             >
               <Text
@@ -152,3 +149,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+export default observer(Playlist);

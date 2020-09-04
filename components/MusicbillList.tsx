@@ -8,27 +8,27 @@ import {
 } from 'react-native';
 import { Text } from '@ui-kitten/components';
 import Toast from 'react-native-root-toast';
-import { inject, observer } from 'mobx-react';
+import { observer } from 'mobx-react';
 
 import zlFetch from '../utils/zlFetch';
-import MusicbillState from '../state/MusicbillState';
 import Layout from '../constants/Device';
 import { Musicbill, Song } from '../types';
+import useStores from '../hooks/useStores';
 
 function MusicbillList({
   closeAddToMusicbillModal,
-  musicbill,
 }: {
   closeAddToMusicbillModal: () => void;
-  musicbill: MusicbillState;
 }) {
+  const { musicbillStore } = useStores();
+
   const addToMusicbill = async (musicbillId: string) => {
     try {
       await zlFetch('https://engine.mebtte.com/1/musicbill/music', {
         token: true,
         body: JSON.stringify({
           musicbill_id: musicbillId,
-          music_id: musicbill.operatingSong?.id,
+          music_id: musicbillStore.operatingSong?.id,
         }),
         method: 'POST',
         headers: {
@@ -36,7 +36,7 @@ function MusicbillList({
         },
       });
       Toast.show('添加成功');
-      musicbill.addSongToMusicbill(musicbill.operatingSong as Song, musicbillId);
+      musicbillStore.addSongToMusicbill(musicbillStore.operatingSong as Song, musicbillId);
       closeAddToMusicbillModal();
     } catch (err) {
       Toast.show(err.message);
@@ -47,7 +47,7 @@ function MusicbillList({
       <Text style={{ marginBottom: 20, fontSize: 18 }}>收藏到歌单</Text>
       <ScrollView>
         <View>
-          {musicbill.musicbillList.map((musicbill) => (
+          {musicbillStore.musicbillList.map((musicbill) => (
             <TouchableOpacity
               style={styles.item}
               key={musicbill.id}
@@ -87,4 +87,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default inject('musicbill')(observer(MusicbillList));
+export default observer(MusicbillList);

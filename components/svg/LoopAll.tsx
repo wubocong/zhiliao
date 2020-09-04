@@ -1,10 +1,10 @@
 import React from 'react';
-import { Svg, Path } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import { ViewStyle } from 'react-native';
 
 export default function LoopAll({
-  color = '000000',
-  style
+  color = '#000000',
+  style,
 }: {
   color?: string;
   style?: ViewStyle;

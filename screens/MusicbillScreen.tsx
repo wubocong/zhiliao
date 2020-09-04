@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { Text, MenuItem, OverflowMenu, Modal } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-root-toast';
 import 'mobx-react-lite/batchingForReactDom';
@@ -18,38 +18,30 @@ import PlayerBottomBar from '../components/PlayerBottomBar';
 import SongItem from '../components/SongItem';
 import MusicbillList from '../components/MusicbillList';
 import { RootStackParamList, MainStackParamList, Song } from '../types';
-import PlayerState from '../state/PlayerState';
-import MusicbillState from '../state/MusicbillState';
 import { ScrollView } from 'react-native-gesture-handler';
 import zlFetch from '../utils/zlFetch';
+import storesContext from '../store';
 
 type State = {
   addToMusicbillModalVisible: boolean;
-  songList: Song[];
   topBarMenuVisible: boolean;
 };
-@inject('player', 'musicbill')
 @observer
 export default class MusicbillScreen extends React.Component<
-  StackScreenProps<RootStackParamList & MainStackParamList, 'Musicbill'> & {
-    player: PlayerState;
-    musicbill: MusicbillState;
-  },
+  StackScreenProps<RootStackParamList & MainStackParamList, 'Musicbill'>,
   State
 > {
+  static contextType = storesContext;
+  context!: React.ContextType<typeof storesContext>;
   constructor(
     props: StackScreenProps<
       RootStackParamList & MainStackParamList,
       'Musicbill'
-    > & {
-      player: PlayerState;
-      musicbill: MusicbillState;
-    }
+    >
   ) {
     super(props);
     this.state = {
       addToMusicbillModalVisible: false,
-      songList: [],
       topBarMenuVisible: false,
     };
   }
@@ -72,8 +64,10 @@ export default class MusicbillScreen extends React.Component<
         },
         this.props.navigation
       );
-      this.setState({ songList: data.music_list });
-      this.props.musicbill.mergeOneMusicbill(this.props.route.params.id, data);
+      this.context.musicbillStore.mergeOneMusicbill(
+        this.props.route.params.id,
+        data
+      );
     } catch (err) {
       Toast.show(err.message);
     }
@@ -87,7 +81,7 @@ export default class MusicbillScreen extends React.Component<
   };
   _openPlayer = (e: GestureResponderEvent) => {
     e.preventDefault(); // 防止web端点击穿透
-    if (this.props.player.currentSong)
+    if (this.context.playerStore.currentSong)
       this.props.navigation.navigate('Player', {
         openPlaylist: this.props.route.params.openPlaylist,
       });
@@ -96,25 +90,20 @@ export default class MusicbillScreen extends React.Component<
     this.setState({ topBarMenuVisible: true });
   };
   _playAll = () => {
-    this.props.player.setPlaylist(this.state.songList);
-    this.props.player.switchSong(this.state.songList[0]);
+    this.context.playerStore.setPlaylist(this.state.songList);
+    this.context.playerStore.switchSong(this.state.songList[0]);
   };
   render() {
     const name = this.props.route.params?.name;
     if (!name) return null;
     const { openPlaylist } = this.props.route.params;
-    const {
-      addSongToPlaylistAndPlay,
-      currentSong,
-      status: { isPlaying },
-      togglePlay,
-    } = this.props.player;
-    const { musicbillList } = this.props.musicbill;
+    const { addSongToPlaylistAndPlay } = this.context.playerStore;
+    const { musicbillList } = this.context.musicbillStore;
     const currentMusicbillId = this.props.route.params.id;
     const { addToMusicbillModalVisible } = this.state;
     const songList = musicbillList.find(
       (musicbill) => musicbill.id === currentMusicbillId
-    )?.music_list;
+    )!.music_list;
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.topBar}>
@@ -165,7 +154,7 @@ export default class MusicbillScreen extends React.Component<
             </OverflowMenu>
           </View>
         </View>
-        {songList && (
+        {songList.length > 0 && (
           <TouchableOpacity style={styles.playAll} onPress={this._playAll}>
             <Feather
               name="play-circle"
@@ -178,7 +167,7 @@ export default class MusicbillScreen extends React.Component<
         )}
         <ScrollView>
           <View>
-            {songList?.map((song) => (
+            {songList.map((song) => (
               <SongItem
                 key={song.id}
                 song={song}
@@ -190,15 +179,11 @@ export default class MusicbillScreen extends React.Component<
           </View>
         </ScrollView>
 
-        {currentSong && (
-          <PlayerBottomBar
-            song={currentSong}
-            onPress={this._openPlayer}
-            togglePlay={togglePlay}
-            openPlaylist={openPlaylist}
-            isPlaying={isPlaying}
-          />
-        )}
+        <PlayerBottomBar
+          onPress={this._openPlayer}
+          openPlaylist={openPlaylist}
+        />
+
         <Modal
           visible={addToMusicbillModalVisible}
           backdropStyle={styles.backdrop}

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
 
@@ -17,24 +17,21 @@ import LoopAll from '../components/svg/LoopAll';
 import LoopOne from '../components/svg/LoopOne';
 import LoopRandom from '../components/svg/LoopRandom';
 import { RootStackParamList, MainStackParamList } from '../types';
-import PlayerState from '../state/PlayerState';
 import Layout from '../constants/Device';
 import {
   LOOPING_TYPE_ALL,
   LOOPING_TYPE_ONE,
-  LOOPING_TYPE_RANDOM,
 } from '../constants/Player';
+import storesContext from '../store';
 
 type State = {
   currentValue: number;
   isSliding: boolean;
 };
-@inject('player')
+
 @observer
 export default class PlayerScreen extends React.Component<
-  StackScreenProps<RootStackParamList & MainStackParamList, 'Player'> & {
-    player: PlayerState;
-  },
+  StackScreenProps<RootStackParamList & MainStackParamList, 'Player'>,
   State
 > {
   rotateValue = new Animated.Value(0);
@@ -54,13 +51,10 @@ export default class PlayerScreen extends React.Component<
       }),
     ])
   );
+  static contextType = storesContext;
+  context!: React.ContextType<typeof storesContext>;
   constructor(
-    props: StackScreenProps<
-      RootStackParamList & MainStackParamList,
-      'Player'
-    > & {
-      player: PlayerState;
-    }
+    props: StackScreenProps<RootStackParamList & MainStackParamList, 'Player'>
   ) {
     super(props);
     this.state = {
@@ -69,24 +63,24 @@ export default class PlayerScreen extends React.Component<
     };
   }
   componentDidMount() {
-    if (!this.props.player.currentSong) this.props.navigation.replace('Home');
-    else if (this.props.player.status.isPlaying) this.rotateAnimation.start();
+    if (!this.context.playerStore.currentSong) this.props.navigation.replace('Home');
+    else if (this.context.playerStore.status.isPlaying) this.rotateAnimation.start();
   }
-  componentDidUpdate(){
-    if (!this.props.player.currentSong) this.props.navigation.replace('Home');
+  componentDidUpdate() {
+    if (!this.context.playerStore.currentSong) this.props.navigation.replace('Home');
   }
   _goBack = () => {
     this.props.navigation.goBack();
   };
   _onSlidingComplete = (value: number) => {
     this.setState({ isSliding: false });
-    this.props.player.setPosition(value);
+    this.context.playerStore.setPosition(value);
   };
   _onSlidingStart = (currentValue: number) => {
     this.setState({ isSliding: true, currentValue });
   };
   _togglePlay = () => {
-    if (this.props.player.status.isPlaying) {
+    if (this.context.playerStore.status.isPlaying) {
       this.rotateValue.stopAnimation((value) => {
         this.rotateValue = new Animated.Value(value);
         this.rotateAnimation = Animated.loop(
@@ -113,20 +107,20 @@ export default class PlayerScreen extends React.Component<
         );
       });
     } else this.rotateAnimation.start();
-    this.props.player.togglePlay();
+    this.context.playerStore.togglePlay();
   };
   render() {
     // 直接访问这个页面不渲染任何东西
-    const { currentSong } = this.props.player;
+    const { currentSong } = this.context.playerStore;
     if (!currentSong) return null;
-    const { setLoopingType, nextSong } = this.props.player;
+    const { setLoopingType, nextSong } = this.context.playerStore;
     const { openPlaylist } = this.props.route.params;
     const {
       isPlaying,
       loopingType,
       playerInstancePosition,
       playerInstanceDuration,
-    } = this.props.player.status;
+    } = this.context.playerStore.status;
     const rotateDegree = this.rotateValue.interpolate({
       inputRange: [0, 1],
       outputRange: ['0deg', '360deg'],
