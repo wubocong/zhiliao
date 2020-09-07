@@ -1,12 +1,13 @@
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
-import { Layout, Text } from '@ui-kitten/components';
+import { Layout, Text, Modal } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-root-toast';
 import { observer } from 'mobx-react';
 
-import { MainStackParamList, RootStackParamList, Musicbill } from '../types';
+import NewMusicbill from '../components/NewMusicbill';
+import { MainStackParamList, RootStackParamList } from '../types';
 import Device from '../constants/Device';
 import zlFetch from '../utils/zlFetch';
 import useStores from '../hooks/useStores';
@@ -24,6 +25,12 @@ function MineTab({
   shouldHavePadding: boolean;
 }) {
   const { musicbillStore } = useStores();
+  const [addMusicbillModalvisible, setAddMusicbillModalvisible] = useState(
+    false
+  );
+  const closeAddMusicbillModal = () => {
+    setAddMusicbillModalvisible(false);
+  };
   useEffect(() => {
     (async function () {
       try {
@@ -50,7 +57,22 @@ function MineTab({
           <View style={styles.musicbillHeader}>
             <Text style={{ fontSize: 18 }}>我创建的歌单</Text>
           </View>
-          {musicbillStore.musicbillList.map((musicbill, index) => (
+          <TouchableOpacity
+            style={[
+              styles.musicbillItem,
+              {
+                borderTopColor: '#c0c4cc',
+                borderTopWidth: 1,
+              },
+            ]}
+            onPress={() => {
+              setAddMusicbillModalvisible(true);
+            }}
+          >
+            <Feather name="plus-square" size={40} style={{ marginRight: 8 }} />
+            <Text>新建歌单</Text>
+          </TouchableOpacity>
+          {musicbillStore.musicbillList.map((musicbill) => (
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate('Musicbill', {
@@ -60,19 +82,20 @@ function MineTab({
                 });
               }}
               key={musicbill.id}
-              style={[
-                styles.musicbillItem,
-                {
-                  borderTopColor: '#c0c4cc',
-                  borderTopWidth: index === 0 ? 1 : 0,
-                },
-              ]}
+              style={styles.musicbillItem}
             >
               <Text>{musicbill.name}</Text>
             </TouchableOpacity>
           ))}
         </Layout>
       </ScrollView>
+      <Modal
+        visible={addMusicbillModalvisible}
+        backdropStyle={styles.backdrop}
+        onBackdropPress={closeAddMusicbillModal}
+      >
+        <NewMusicbill onCancel={closeAddMusicbillModal} />
+      </Modal>
     </Layout>
   );
 }
@@ -104,6 +127,9 @@ const styles = StyleSheet.create({
   },
   singer: {
     fontSize: 12,
+  },
+  backdrop: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
 });
 
