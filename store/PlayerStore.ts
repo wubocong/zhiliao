@@ -37,7 +37,6 @@ export default class PlayerStore {
     shouldCorrectPitch: true,
   };
 
-  
   @action setStatus = (statusObject: PlayerStatus) => {
     Object.assign(this.status, statusObject);
   };
@@ -53,6 +52,10 @@ export default class PlayerStore {
       this.playlist.push(song);
     }
     this.switchSong(song);
+  };
+  @action clearPlaylist = async () => {
+    this.playlist = [];
+    this.unloadSong();
   };
   @action deleteSongfromPlaylist = async (song: Song) => {
     const { playlist, currentSong } = this;
@@ -113,6 +116,13 @@ export default class PlayerStore {
   @action switchSong = (song: Song) => {
     this.currentSong = song;
     this._loadSong(song.normal);
+  };
+  @action unloadSong = async () => {
+    if (this.playerInstance) {
+      this.currentSong = undefined;
+      await this.playerInstance.unloadAsync();
+      this.playerInstance = null;
+    }
   };
   togglePlay = () => {
     if (!this.playerInstance) {

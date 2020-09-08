@@ -6,7 +6,8 @@ import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-root-toast';
 import { observer } from 'mobx-react';
 
-import NewMusicbill from '../components/NewMusicbill';
+import NewMusicbill from './NewMusicbill';
+import MusicbillItem from './MusicbillItem';
 import { MainStackParamList, RootStackParamList } from '../types';
 import Device from '../constants/Device';
 import zlFetch from '../utils/zlFetch';
@@ -31,22 +32,6 @@ function MineTab({
   const closeAddMusicbillModal = () => {
     setAddMusicbillModalvisible(false);
   };
-  useEffect(() => {
-    (async function () {
-      try {
-        const data = await zlFetch(
-          'https://engine.mebtte.com/1/musicbill/list',
-          {
-            token: true,
-          },
-          navigation
-        );
-        musicbillStore.setMusicbillList(data);
-      } catch (err) {
-        Toast.show(err.message);
-      }
-    })();
-  }, []);
   return (
     <Layout
       level="1"
@@ -58,13 +43,7 @@ function MineTab({
             <Text style={{ fontSize: 18 }}>我创建的歌单</Text>
           </View>
           <TouchableOpacity
-            style={[
-              styles.musicbillItem,
-              {
-                borderTopColor: '#c0c4cc',
-                borderTopWidth: 1,
-              },
-            ]}
+            style={styles.newMusicbill}
             onPress={() => {
               setAddMusicbillModalvisible(true);
             }}
@@ -73,7 +52,9 @@ function MineTab({
             <Text>新建歌单</Text>
           </TouchableOpacity>
           {musicbillStore.musicbillList.map((musicbill) => (
-            <TouchableOpacity
+            <MusicbillItem
+              key={musicbill.id}
+              musicbill={musicbill}
               onPress={() => {
                 navigation.navigate('Musicbill', {
                   name: musicbill.name,
@@ -81,11 +62,8 @@ function MineTab({
                   openPlaylist,
                 });
               }}
-              key={musicbill.id}
-              style={styles.musicbillItem}
-            >
-              <Text>{musicbill.name}</Text>
-            </TouchableOpacity>
+              showMoreButton
+            />
           ))}
         </Layout>
       </ScrollView>
@@ -104,19 +82,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     height: Device.window.height - 54, // 不设置height web无法滚动
-    paddingLeft: 20,
-    paddingRight: 20,
   },
   musicbillHeader: {
-    marginTop: 20,
-    marginBottom: 10,
+    padding: 20,
   },
-  musicbillItem: {
+  newMusicbill: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomColor: '#c0c4cc',
-    borderBottomWidth: 1,
     height: 60,
+    paddingLeft: 20,
+    paddingRight: 20,
   },
   songInfo: {
     flexDirection: 'column',

@@ -20,7 +20,7 @@ export default function LoginScreen({
   const [captcha, onChangeCaptcha] = useState('');
   const [captchaCoolDown, setCaptchaCoolDown] = useState(true);
   const [token, setToken] = useState('');
-  const { musicbillStore } = useStores();
+  const { musicbillStore:{loadAllMusicbillDetail} } = useStores();
   const sendCaptcha = async () => {
     try {
       await zlFetch(
@@ -53,32 +53,7 @@ export default function LoginScreen({
       );
       Toast.show('登录成功');
       await Promise.all([
-        zlFetch('https://engine.mebtte.com/1/musicbill/list', {
-          token: data.token,
-        })
-          .then((musicbillList: Musicbill[]) => {
-            musicbillStore.setMusicbillList(musicbillList);
-            musicbillList.forEach((musicbill) => {
-              zlFetch(
-                `https://engine.mebtte.com/1/musicbill?id=${musicbill.id}`,
-                {
-                  token: data.token,
-                }
-              )
-                .then((musicbillDetail) => {
-                  musicbillStore.mergeOneMusicbill(
-                    musicbill.id,
-                    musicbillDetail
-                  );
-                })
-                .catch((err) => {
-                  Toast.show(err.message);
-                });
-            });
-          })
-          .catch((err) => {
-            Toast.show(err.message);
-          }),
+        loadAllMusicbillDetail(data.token),
         AsyncStorage.setItem('user_info', JSON.stringify(data)),
         AsyncStorage.setItem('token', data.token),
       ]);

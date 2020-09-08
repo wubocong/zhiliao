@@ -4,9 +4,9 @@ import { Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 import { observer } from 'mobx-react';
 
-import LoopAll from '../components/svg/LoopAll';
-import LoopOne from '../components/svg/LoopOne';
-import LoopRandom from '../components/svg/LoopRandom';
+import LoopAll from '../components/png/LoopAll';
+import LoopOne from '../components/png/LoopOne';
+import LoopRandom from '../components/png/LoopRandom';
 import Layout from '../constants/Device';
 import {
   LOOPING_TYPE_ALL,
@@ -18,6 +18,7 @@ import useStores from '../hooks/useStores';
 function Playlist() {
   const {
     playerStore: {
+      clearPlaylist,
       currentSong,
       deleteSongfromPlaylist,
       playlist,
@@ -82,7 +83,7 @@ function Playlist() {
               <Text>收藏全部</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={clearPlaylist}>
             <Feather name="trash-2" size={16} color="black" />
           </TouchableOpacity>
         </View>
@@ -134,6 +135,7 @@ const styles = StyleSheet.create({
   },
   icon: {
     width: 16,
+    height: 16,
     marginRight: 4,
   },
   songItem: {

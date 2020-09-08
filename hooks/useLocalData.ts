@@ -4,9 +4,10 @@ import AsyncStorage from '@react-native-community/async-storage';
 
 import useStores from '../hooks/useStores';
 import zlFetch from '../utils/zlFetch';
+import { Musicbill } from '../types';
 
 export default function useLocalData() {
-  const { musicbillStore } = useStores();
+  const { musicbillStore:{setMusicbillList,loadAllMusicbillDetail} } = useStores();
   useEffect(() => {
     (async function () {
       try {
@@ -14,16 +15,8 @@ export default function useLocalData() {
         if (!token) return;
         const musicbillList = await AsyncStorage.getItem('musicbillList');
         if (musicbillList)
-          musicbillStore.setMusicbillList(JSON.parse(musicbillList));
-        else {
-          const data = await zlFetch(
-            'https://engine.mebtte.com/1/musicbill/list',
-            {
-              token: true,
-            }
-          );
-          musicbillStore.setMusicbillList(data);
-        }
+          setMusicbillList(JSON.parse(musicbillList));
+        else await loadAllMusicbillDetail()
       } catch (err) {
         Toast.show(err.message);
       }

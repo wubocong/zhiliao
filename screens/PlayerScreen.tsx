@@ -13,15 +13,12 @@ import { observer } from 'mobx-react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
 
-import LoopAll from '../components/svg/LoopAll';
-import LoopOne from '../components/svg/LoopOne';
-import LoopRandom from '../components/svg/LoopRandom';
+import LoopAll from '../components/png/LoopAll';
+import LoopOne from '../components/png/LoopOne';
+import LoopRandom from '../components/png/LoopRandom';
 import { RootStackParamList, MainStackParamList } from '../types';
 import Layout from '../constants/Device';
-import {
-  LOOPING_TYPE_ALL,
-  LOOPING_TYPE_ONE,
-} from '../constants/Player';
+import { LOOPING_TYPE_ALL, LOOPING_TYPE_ONE } from '../constants/Player';
 import storesContext from '../store';
 
 type State = {
@@ -63,11 +60,14 @@ export default class PlayerScreen extends React.Component<
     };
   }
   componentDidMount() {
-    if (!this.context.playerStore.currentSong) this.props.navigation.replace('Home');
-    else if (this.context.playerStore.status.isPlaying) this.rotateAnimation.start();
+    if (!this.context.playerStore.currentSong)
+      this.props.navigation.replace('Home');
+    else if (this.context.playerStore.status.isPlaying)
+      this.rotateAnimation.start();
   }
   componentDidUpdate() {
-    if (!this.context.playerStore.currentSong) this.props.navigation.replace('Home');
+    if (!this.context.playerStore.currentSong)
+      this.props.navigation.replace('Home');
   }
   _goBack = () => {
     this.props.navigation.goBack();
@@ -179,7 +179,7 @@ export default class PlayerScreen extends React.Component<
           </View>
           <View style={styles.controller}>
             <TouchableOpacity
-              style={{ width: 24 }}
+              style={{ width: 22, height: 22 }}
               onPress={() => setLoopingType((loopingType + 1) % 3)}
             >
               <LoopIcon />

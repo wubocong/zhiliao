@@ -64,10 +64,7 @@ export default class MusicbillScreen extends React.Component<
         },
         this.props.navigation
       );
-      this.context.musicbillStore.mergeOneMusicbill(
-        this.props.route.params.id,
-        data
-      );
+      this.context.musicbillStore.mergeOneMusicbill(data);
     } catch (err) {
       Toast.show(err.message);
     }
@@ -90,8 +87,11 @@ export default class MusicbillScreen extends React.Component<
     this.setState({ topBarMenuVisible: true });
   };
   _playAll = () => {
-    this.context.playerStore.setPlaylist(this.state.songList);
-    this.context.playerStore.switchSong(this.state.songList[0]);
+    const songList = this.context.musicbillStore.musicbillList.find(
+      (musicbill) => musicbill.id === this.props.route.params.id
+    )!.music_list;
+    this.context.playerStore.setPlaylist(songList);
+    this.context.playerStore.switchSong(songList[0]);
   };
   render() {
     const name = this.props.route.params?.name;

@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { MainStackParamList, RootStackParamList } from '../types';
 export default async function (
   url: string,
-  options?: RequestInit & { token?: boolean },
+  options?: RequestInit & { token?: boolean | string },
   navigation?: StackNavigationProp<
     MainStackParamList & RootStackParamList,
     'Home' | 'Login' | 'Main' | 'Musicbill' | 'Player' | 'NotFound'

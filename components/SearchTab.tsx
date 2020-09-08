@@ -97,8 +97,8 @@ const styles = StyleSheet.create({
     height: Device.window.height - 54, // 不设置height web无法滚动
   },
   input: {
-    width: '100%',
-    marginTop: 5,
+    margin: 20,
+    marginBottom: 5,
   },
   backdrop: {
     backgroundColor: 'rgba(0, 0, 0, 0.5)',

@@ -2,11 +2,8 @@ import React, { useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { Text, MenuItem, OverflowMenu } from '@ui-kitten/components';
-import { observer } from 'mobx-react';
-import Toast from 'react-native-root-toast';
 
 import { Song } from '../types';
-import zlFetch from '../utils/zlFetch';
 import useStores from '../hooks/useStores';
 
 function SongItem({
@@ -20,10 +17,12 @@ function SongItem({
   openAddToMusicbillModal: () => void;
   song: Song;
 }) {
-  const { musicbillStore } = useStores();
+  const {
+    musicbillStore: { setOperatingSong, deleteSongFromMusicbill },
+  } = useStores();
   const [menuVisible, setMenuVisible] = useState(false);
   const openMenu = () => {
-    musicbillStore.setOperatingSong(song);
+    setOperatingSong(song);
     setMenuVisible(true);
   };
   const closeMenu = () => {
@@ -87,20 +86,7 @@ function SongItem({
           accessoryLeft={() => (
             <Feather name="trash-2" size={20} color="black" />
           )}
-          onPress={async () => {
-            try {
-              await zlFetch(
-                `https://engine.mebtte.com/1/musicbill/music?musicbill_id=${currentMusicbillId}&music_id=${song.id}`,
-                {
-                  token: true,
-                  method: 'DELETE',
-                }
-              );
-              musicbillStore.deleteSongFromMusicbill(song, currentMusicbillId as string);
-            } catch (err) {
-              Toast.show(err.message);
-            }
-          }}
+          onPress={() => deleteSongFromMusicbill(song, currentMusicbillId!)}
         />
       </OverflowMenu>
     </TouchableOpacity>
@@ -130,4 +116,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default observer(SongItem);
+export default React.memo(SongItem);
