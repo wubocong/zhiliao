@@ -15,7 +15,7 @@ export default class MusicbillStore {
     });
     this._persistMusicbillList();
   };
-  @action setOperatingSong = (operatingSong: Song | undefined) => {
+  @action setOperatingSong = (operatingSong?: Song) => {
     this.operatingSong = operatingSong;
   };
 
@@ -92,12 +92,12 @@ export default class MusicbillStore {
       Toast.show(err.message);
     }
   };
-  @action loadAllMusicbillDetail = async (token?: string) => {
+  @action loadAllMusicbillDetail = async (token?: any) => {
     try {
       const musicbillList = (await zlFetch(
         'https://engine.mebtte.com/1/musicbill/list',
         {
-          token: token || true,
+          token: typeof token === 'string' ? token : true,
         }
       )) as Musicbill[];
       this.setMusicbillList(musicbillList);
@@ -107,7 +107,7 @@ export default class MusicbillStore {
             const musicbillDetail = await zlFetch(
               `https://engine.mebtte.com/1/musicbill?id=${musicbill.id}`,
               {
-                token: token,
+                token: typeof token === 'string' ? token : true,
               }
             );
             this.mergeOneMusicbill(musicbillDetail);

@@ -5,28 +5,47 @@ import { Text, MenuItem, OverflowMenu } from '@ui-kitten/components';
 
 import { Song } from '../types';
 import useStores from '../hooks/useStores';
+import withConfirm from '../hoc/withConfirm';
 
 function SongItem({
   addSongToPlaylistAndPlay,
+  confirm,
   currentMusicbillId,
   openAddToMusicbillModal,
   song,
 }: {
   addSongToPlaylistAndPlay: (song: Song) => void;
+  confirm: ({
+    callback,
+    cancelButtonText,
+    confirmButtonText,
+    content,
+    title,
+  }: {
+    callback: () => void;
+    cancelButtonText?: string;
+    confirmButtonText?: string;
+    content: JSX.Element | string;
+    title?: string;
+  }) => void;
   currentMusicbillId?: string;
   openAddToMusicbillModal: () => void;
   song: Song;
 }) {
   const {
     musicbillStore: { setOperatingSong, deleteSongFromMusicbill },
+    playerStore: { playAfterCurrentSong },
+    globalStore: { setCloseModalFunction },
   } = useStores();
   const [menuVisible, setMenuVisible] = useState(false);
-  const openMenu = () => {
-    setOperatingSong(song);
-    setMenuVisible(true);
-  };
   const closeMenu = () => {
     setMenuVisible(false);
+  };
+  const openMenu = () => {
+    setCloseModalFunction(closeMenu);
+    setOperatingSong(song);
+    setMenuVisible(true);
+    
   };
   const addToMusicbill = () => {
     closeMenu();
@@ -66,6 +85,10 @@ function SongItem({
           accessoryLeft={() => (
             <Feather name="fast-forward" size={20} color="black" />
           )}
+          onPress={() => {
+            closeMenu();
+            playAfterCurrentSong(song);
+          }}
         />
         <MenuItem
           title="收藏到歌单"
@@ -86,7 +109,15 @@ function SongItem({
           accessoryLeft={() => (
             <Feather name="trash-2" size={20} color="black" />
           )}
-          onPress={() => deleteSongFromMusicbill(song, currentMusicbillId!)}
+          onPress={() => {
+            closeMenu();
+            confirm({
+              callback: () =>
+                deleteSongFromMusicbill(song, currentMusicbillId!),
+              confirmButtonText: '删除',
+              content: `确定从歌单中删除歌曲“${song.name}”？`,
+            });
+          }}
         />
       </OverflowMenu>
     </TouchableOpacity>
@@ -116,4 +147,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default React.memo(SongItem);
+export default withConfirm(SongItem);

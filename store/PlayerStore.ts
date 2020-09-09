@@ -40,7 +40,7 @@ export default class PlayerStore {
   @action setStatus = (statusObject: PlayerStatus) => {
     Object.assign(this.status, statusObject);
   };
-  @action setCurrentSong = (song: Song | undefined) => {
+  @action setCurrentSong = (song?: Song) => {
     this.currentSong = song;
   };
   @action setPlaylist = (playlist: Song[]) => {
@@ -48,8 +48,12 @@ export default class PlayerStore {
   };
 
   @action addSongToPlaylistAndPlay = (song: Song) => {
-    if (!this.playlist.find((item) => item.id === song.id)) {
-      this.playlist.push(song);
+    if (this._getSongIndexInPlaylist(song) === -1) {
+      this.playlist.splice(
+        this._getSongIndexInPlaylist(this.currentSong) + 1,
+        0,
+        song
+      );
     }
     this.switchSong(song);
   };
@@ -96,6 +100,16 @@ export default class PlayerStore {
       this.switchSong(playlist[randomIndex]);
     }
   };
+  @action playAfterCurrentSong = (song: Song) => {
+    const index = this._getSongIndexInPlaylist(song);
+    if (index !== -1) this.playlist.splice(index, 1);
+    this.playlist.splice(
+      this._getSongIndexInPlaylist(this.currentSong) + 1,
+      0,
+      song
+    );
+    if (this.playlist.length === 1) this.switchSong(song);
+  };
   @action setLoopingType = async (newLoopingType: number) => {
     const { loopingType } = this.status;
     if (loopingType !== newLoopingType) {
@@ -118,8 +132,8 @@ export default class PlayerStore {
     this._loadSong(song.normal);
   };
   @action unloadSong = async () => {
+    this.currentSong = undefined;
     if (this.playerInstance) {
-      this.currentSong = undefined;
       await this.playerInstance.unloadAsync();
       this.playerInstance = null;
     }
@@ -134,6 +148,9 @@ export default class PlayerStore {
         this.playerInstance.playAsync();
       }
     }
+  };
+  _getSongIndexInPlaylist = (song?: Song) => {
+    return this.playlist.findIndex((item) => item.id === song?.id);
   };
   _loadSong = async (uri: string) => {
     if (this.playerInstance) {

@@ -1,6 +1,6 @@
 import { StackScreenProps } from '@react-navigation/stack';
 import React from 'react';
-import { StyleSheet, GestureResponderEvent, BackHandler } from 'react-native';
+import { StyleSheet, GestureResponderEvent } from 'react-native';
 import { Tab, TabView, Modal } from '@ui-kitten/components';
 import { Audio } from 'expo-av';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -43,20 +43,9 @@ export default class HomeScreen extends React.Component<
       interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
       playThroughEarpieceAndroid: false,
     });
-    BackHandler.addEventListener('hardwareBackPress', this._onBackPress);
-  }
-  componentWillUnmount() {
-    BackHandler.removeEventListener('hardwareBackPress', this._onBackPress);
   }
   _closePlaylist = () => {
     this.setState({ playlistVisible: false });
-  };
-  _onBackPress = () => {
-    if (this.state.playlistVisible) {
-      this.setState({ playlistVisible: false });
-      return true;
-    }
-    return false;
   };
   _openPlayer = (e: GestureResponderEvent) => {
     e.preventDefault(); // 防止web端点击穿透
@@ -67,6 +56,7 @@ export default class HomeScreen extends React.Component<
       });
   };
   _openPlaylist = () => {
+    this.context.globalStore.setCloseModalFunction(this._closePlaylist);
     this.setState({ playlistVisible: true });
   };
 

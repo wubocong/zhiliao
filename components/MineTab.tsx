@@ -25,7 +25,9 @@ function MineTab({
   openPlaylist: () => void;
   shouldHavePadding: boolean;
 }) {
-  const { musicbillStore } = useStores();
+  const {
+    musicbillStore: { musicbillList, loadAllMusicbillDetail },
+  } = useStores();
   const [addMusicbillModalvisible, setAddMusicbillModalvisible] = useState(
     false
   );
@@ -41,6 +43,9 @@ function MineTab({
         <Layout level="1">
           <View style={styles.musicbillHeader}>
             <Text style={{ fontSize: 18 }}>我创建的歌单</Text>
+            <TouchableOpacity onPress={loadAllMusicbillDetail}>
+              <Feather name="refresh-cw" size={20} color="black" />
+            </TouchableOpacity>
           </View>
           <TouchableOpacity
             style={styles.newMusicbill}
@@ -51,7 +56,7 @@ function MineTab({
             <Feather name="plus-square" size={40} style={{ marginRight: 8 }} />
             <Text>新建歌单</Text>
           </TouchableOpacity>
-          {musicbillStore.musicbillList.map((musicbill) => (
+          {musicbillList.map((musicbill) => (
             <MusicbillItem
               key={musicbill.id}
               musicbill={musicbill}
@@ -85,6 +90,9 @@ const styles = StyleSheet.create({
   },
   musicbillHeader: {
     padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   newMusicbill: {
     flexDirection: 'row',

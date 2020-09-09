@@ -6,25 +6,43 @@ import { observer } from 'mobx-react';
 
 import { Musicbill } from '../types';
 import useStores from '../hooks/useStores';
+import withConfirm from '../hoc/withConfirm';
 
 function MusicbillItem({
+  confirm,
   musicbill,
   onPress,
   showMoreButton = false,
 }: {
+  confirm: ({
+    callback,
+    cancelButtonText,
+    confirmButtonText,
+    content,
+    title,
+  }: {
+    callback: () => void;
+    cancelButtonText?: string;
+    confirmButtonText?: string;
+    content: JSX.Element | string;
+    title?: string;
+  }) => void;
   musicbill: Musicbill;
   onPress: () => void;
   showMoreButton?: boolean;
 }) {
   const {
     musicbillStore: { deleteMusicbill },
+    globalStore: { setCloseModalFunction },
   } = useStores();
   const [menuVisible, setMenuVisible] = useState(false);
-  const openMenu = () => {
-    setMenuVisible(true);
-  };
+
   const closeMenu = () => {
     setMenuVisible(false);
+  };
+  const openMenu = () => {
+    setCloseModalFunction(closeMenu);
+    setMenuVisible(true);
   };
   return (
     <TouchableOpacity style={styles.musicbillItem} onPress={onPress}>
@@ -49,7 +67,14 @@ function MusicbillItem({
             accessoryLeft={() => (
               <Feather name="trash-2" size={20} color="black" />
             )}
-            onPress={() => deleteMusicbill(musicbill.id)}
+            onPress={() => {
+              closeMenu();
+              confirm({
+                callback: () => deleteMusicbill(musicbill.id),
+                confirmButtonText: '删除',
+                content: `确定删除歌单“${musicbill.name}”？`,
+              });
+            }}
           />
         </OverflowMenu>
       )}
@@ -75,4 +100,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default observer(MusicbillItem);
+export default withConfirm(observer(MusicbillItem));
