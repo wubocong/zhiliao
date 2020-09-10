@@ -20,7 +20,13 @@ export default function LoginScreen({
   const [captcha, onChangeCaptcha] = useState('');
   const [captchaCoolDown, setCaptchaCoolDown] = useState(true);
   const [token, setToken] = useState('');
-  const { musicbillStore:{loadAllMusicbillDetail} } = useStores();
+  const {
+    musicbillStore: { loadAllMusicbillDetail },
+    globalStore: { setNavigation },
+  } = useStores();
+  useEffect(() => {
+    setNavigation(navigation);
+  }, []);
   const sendCaptcha = async () => {
     try {
       await zlFetch(
@@ -48,8 +54,7 @@ export default function LoginScreen({
             'Content-Type': 'application/json',
           },
           method: 'POST',
-        },
-        navigation
+        }
       );
       Toast.show('登录成功');
       await Promise.all([

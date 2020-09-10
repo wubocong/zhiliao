@@ -1,7 +1,7 @@
 import { StackScreenProps } from '@react-navigation/stack';
 import React from 'react';
 import { StyleSheet, GestureResponderEvent } from 'react-native';
-import { Tab, TabView, Modal } from '@ui-kitten/components';
+import { Tab, TabView } from '@ui-kitten/components';
 import { Audio } from 'expo-av';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { observer } from 'mobx-react';
@@ -9,12 +9,10 @@ import { observer } from 'mobx-react';
 import PlayerBottomBar from '../components/PlayerBottomBar';
 import SearchTab from '../components/SearchTab';
 import MineTab from '../components/MineTab';
-import Playlist from '../components/Playlist';
 import { MainStackParamList, RootStackParamList } from '../types';
 import storesContext from '../store';
 
 type State = {
-  playlistVisible: boolean;
   selectedIndex: number;
 };
 @observer
@@ -29,35 +27,25 @@ export default class HomeScreen extends React.Component<
   ) {
     super(props);
     this.state = {
-      playlistVisible: false,
       selectedIndex: 0,
     };
   }
   componentDidMount() {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
-      staysActiveInBackground: false,
+      staysActiveInBackground: true,
       interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
       playsInSilentModeIOS: true,
       shouldDuckAndroid: true,
       interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
       playThroughEarpieceAndroid: false,
     });
+    this.context.globalStore.setNavigation(this.props.navigation);
   }
-  _closePlaylist = () => {
-    this.setState({ playlistVisible: false });
-  };
   _openPlayer = (e: GestureResponderEvent) => {
     e.preventDefault(); // 防止web端点击穿透
     const { currentSong } = this.context.playerStore;
-    if (currentSong)
-      this.props.navigation.navigate('Player', {
-        openPlaylist: this._openPlaylist,
-      });
-  };
-  _openPlaylist = () => {
-    this.context.globalStore.setCloseModalFunction(this._closePlaylist);
-    this.setState({ playlistVisible: true });
+    if (currentSong) this.props.navigation.navigate('Player');
   };
 
   _setSelectedIndex = (selectedIndex: number) => {
@@ -65,12 +53,9 @@ export default class HomeScreen extends React.Component<
     if (!Number.isNaN(selectedIndex)) this.setState({ selectedIndex });
   };
   render() {
-    const {
-      addSongToPlaylistAndPlay,
-      playlist,
-    } = this.context.playerStore;
+    const { playlist } = this.context.playerStore;
     const { navigation } = this.props;
-    const { playlistVisible, selectedIndex } = this.state;
+    const { selectedIndex } = this.state;
     return (
       <SafeAreaView style={styles.container}>
         <TabView
@@ -81,29 +66,15 @@ export default class HomeScreen extends React.Component<
           <Tab title="我的">
             <MineTab
               shouldHavePadding={playlist.length !== 0}
-              navigation={navigation}
-              openPlaylist={this._openPlaylist}
             />
           </Tab>
           <Tab title="发现">
             <SearchTab
-              addSongToPlaylistAndPlay={addSongToPlaylistAndPlay}
-              navigation={navigation}
               shouldHavePadding={playlist.length !== 0}
             />
           </Tab>
         </TabView>
-        <PlayerBottomBar
-          onPress={this._openPlayer}
-          openPlaylist={this._openPlaylist}
-        />
-        <Modal
-          visible={playlistVisible}
-          backdropStyle={styles.playlistBackdrop}
-          onBackdropPress={this._closePlaylist}
-        >
-          <Playlist />
-        </Modal>
+        <PlayerBottomBar onPress={this._openPlayer} />
       </SafeAreaView>
     );
   }
@@ -114,8 +85,5 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingTop: 20,
-  },
-  playlistBackdrop: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
 });

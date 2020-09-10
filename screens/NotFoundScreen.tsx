@@ -2,11 +2,18 @@ import { StackScreenProps } from '@react-navigation/stack';
 import * as React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { RootStackParamList } from '../types';
+import { RootStackParamList, MainStackParamList } from '../types';
+import useStores from '../hooks/useStores';
 
 export default function NotFoundScreen({
   navigation,
-}: StackScreenProps<RootStackParamList, 'NotFound'>) {
+}: StackScreenProps<RootStackParamList & MainStackParamList, 'NotFound'>) {
+  const {
+    globalStore: { setNavigation },
+  } = useStores();
+  React.useEffect(() => {
+    setNavigation(navigation);
+  }, []);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>This screen doesn't exist.</Text>

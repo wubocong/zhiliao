@@ -4,9 +4,10 @@ import GlobalStore from './GlobalStore';
 import MusicbillStore from './MusicbillStore';
 import PlayerStore from './PlayerStore';
 
+const globalStore = new GlobalStore();
 const storesContext = React.createContext({
-  globalStore: new GlobalStore(),
-  musicbillStore: new MusicbillStore(),
+  globalStore,
+  musicbillStore: new MusicbillStore(globalStore),
   playerStore: new PlayerStore(),
 });
 

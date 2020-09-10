@@ -1,39 +1,28 @@
-import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
 import { Layout, Text, Modal } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
-import Toast from 'react-native-root-toast';
 import { observer } from 'mobx-react';
 
-import NewMusicbill from './NewMusicbill';
 import MusicbillItem from './MusicbillItem';
-import { MainStackParamList, RootStackParamList } from '../types';
 import Device from '../constants/Device';
-import zlFetch from '../utils/zlFetch';
 import useStores from '../hooks/useStores';
+import withNewMusicbillModal from '../hoc/withNewMusicbillModal';
 
 function MineTab({
-  navigation,
-  openPlaylist,
+  openNewMusicbillModal,
   shouldHavePadding,
 }: {
-  navigation: StackNavigationProp<
-    MainStackParamList & RootStackParamList,
-    'Home'
-  >;
-  openPlaylist: () => void;
+  openNewMusicbillModal: () => void;
   shouldHavePadding: boolean;
 }) {
   const {
     musicbillStore: { musicbillList, loadAllMusicbillDetail },
+    globalStore: { navigation },
   } = useStores();
-  const [addMusicbillModalvisible, setAddMusicbillModalvisible] = useState(
-    false
-  );
-  const closeAddMusicbillModal = () => {
-    setAddMusicbillModalvisible(false);
-  };
+  useEffect(() => {
+    loadAllMusicbillDetail();
+  }, []);
   return (
     <Layout
       level="1"
@@ -49,9 +38,7 @@ function MineTab({
           </View>
           <TouchableOpacity
             style={styles.newMusicbill}
-            onPress={() => {
-              setAddMusicbillModalvisible(true);
-            }}
+            onPress={openNewMusicbillModal}
           >
             <Feather name="plus-square" size={40} style={{ marginRight: 8 }} />
             <Text>新建歌单</Text>
@@ -61,10 +48,9 @@ function MineTab({
               key={musicbill.id}
               musicbill={musicbill}
               onPress={() => {
-                navigation.navigate('Musicbill', {
+                navigation!.navigate('Musicbill', {
                   name: musicbill.name,
                   id: musicbill.id,
-                  openPlaylist,
                 });
               }}
               showMoreButton
@@ -72,13 +58,6 @@ function MineTab({
           ))}
         </Layout>
       </ScrollView>
-      <Modal
-        visible={addMusicbillModalvisible}
-        backdropStyle={styles.backdrop}
-        onBackdropPress={closeAddMusicbillModal}
-      >
-        <NewMusicbill onCancel={closeAddMusicbillModal} />
-      </Modal>
     </Layout>
   );
 }
@@ -111,9 +90,6 @@ const styles = StyleSheet.create({
   singer: {
     fontSize: 12,
   },
-  backdrop: {
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
 });
 
-export default observer(MineTab);
+export default withNewMusicbillModal(observer(MineTab));

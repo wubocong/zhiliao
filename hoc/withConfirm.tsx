@@ -1,14 +1,25 @@
 import React from 'react';
 import { Text, Modal, Layout, Button } from '@ui-kitten/components';
 import { StyleSheet, View } from 'react-native';
-import { IReactComponent } from 'mobx-react/dist/types/IReactComponent';
 
 import Device from '../constants/Device';
 import storesContext from '../store';
 
-export default function withConfirm(WrappedComponent: IReactComponent) {
-  return class extends React.Component<
-    any,
+type confirmOptions = {
+  callback: () => void;
+  cancelButtonText?: string;
+  confirmButtonText?: string;
+  content: JSX.Element | string;
+  title?: string;
+};
+interface InjectProps {
+  confirm(params: confirmOptions): void;
+}
+export default function withConfirm<Props extends InjectProps>(
+  WrappedComponent: React.ComponentType<Props>
+) {
+  class WithConfirm extends React.Component<
+    Omit<Props, keyof InjectProps>,
     {
       modalVisibile: boolean;
       title?: string;
@@ -20,7 +31,8 @@ export default function withConfirm(WrappedComponent: IReactComponent) {
     static contextType = storesContext;
     context!: React.ContextType<typeof storesContext>;
     callback?: () => void;
-    constructor(props: any) {
+    static displayName: string;
+    constructor(props: Omit<Props, keyof InjectProps>) {
       super(props);
       this.state = {
         cancelButtonText: '取消',
@@ -44,7 +56,7 @@ export default function withConfirm(WrappedComponent: IReactComponent) {
       title?: string;
     }) => {
       this.callback = callback;
-      this.context.globalStore.setCloseModalFunction(this._closeModal);
+      this.context.globalStore.pushCloseModalFunction(this._closeModal);
       this.setState({
         cancelButtonText,
         confirmButtonText,
@@ -63,7 +75,8 @@ export default function withConfirm(WrappedComponent: IReactComponent) {
     render() {
       return (
         <>
-          <WrappedComponent confirm={this._confirm} {...this.props} />
+          {/* Typescript bug */}
+          <WrappedComponent confirm={this._confirm} {...(this.props as any)} />
           <Modal
             visible={this.state.modalVisibile}
             backdropStyle={styles.backdrop}
@@ -71,9 +84,7 @@ export default function withConfirm(WrappedComponent: IReactComponent) {
           >
             <Layout style={styles.container} level="1">
               {this.state.title && (
-                <Text style={{ marginBottom: 8, fontSize: 18 }}>
-                  {this.state.title}
-                </Text>
+                <Text style={styles.modalTitle}>{this.state.title}</Text>
               )}
               {typeof this.state.content === 'string' ? (
                 <Text style={{ textAlign: 'center' }}>
@@ -95,7 +106,11 @@ export default function withConfirm(WrappedComponent: IReactComponent) {
         </>
       );
     }
-  };
+  }
+  const displayName =
+    WrappedComponent.displayName || WrappedComponent.name || 'Component';
+  WithConfirm.displayName = `WithConfirm${displayName}`;
+  return WithConfirm;
 }
 
 const styles = StyleSheet.create({
@@ -103,6 +118,10 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 10,
     width: Device.window.width - 80,
+  },
+  modalTitle: {
+    padding: 20,
+    fontSize: 18,
   },
   buttons: {
     flexDirection: 'row',

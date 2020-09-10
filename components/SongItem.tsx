@@ -6,15 +6,14 @@ import { Text, MenuItem, OverflowMenu } from '@ui-kitten/components';
 import { Song } from '../types';
 import useStores from '../hooks/useStores';
 import withConfirm from '../hoc/withConfirm';
+import withMusicbillListModal from '../hoc/withMusicbillListModal';
 
 function SongItem({
-  addSongToPlaylistAndPlay,
   confirm,
   currentMusicbillId,
-  openAddToMusicbillModal,
+  openMusicbillListModal,
   song,
 }: {
-  addSongToPlaylistAndPlay: (song: Song) => void;
   confirm: ({
     callback,
     cancelButtonText,
@@ -29,27 +28,25 @@ function SongItem({
     title?: string;
   }) => void;
   currentMusicbillId?: string;
-  openAddToMusicbillModal: () => void;
+  openMusicbillListModal: (song: Song) => void;
   song: Song;
 }) {
   const {
-    musicbillStore: { setOperatingSong, deleteSongFromMusicbill },
-    playerStore: { playAfterCurrentSong },
-    globalStore: { setCloseModalFunction },
+    musicbillStore: { deleteSongFromMusicbill },
+    playerStore: { playAfterCurrentSong, addSongToPlaylistAndPlay },
+    globalStore: { pushCloseModalFunction },
   } = useStores();
   const [menuVisible, setMenuVisible] = useState(false);
   const closeMenu = () => {
     setMenuVisible(false);
   };
   const openMenu = () => {
-    setCloseModalFunction(closeMenu);
-    setOperatingSong(song);
+    pushCloseModalFunction(closeMenu);
     setMenuVisible(true);
-    
   };
   const addToMusicbill = () => {
     closeMenu();
-    openAddToMusicbillModal();
+    openMusicbillListModal(song);
   };
   return (
     <TouchableOpacity
@@ -147,4 +144,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default withConfirm(SongItem);
+export default withMusicbillListModal(withConfirm(SongItem));

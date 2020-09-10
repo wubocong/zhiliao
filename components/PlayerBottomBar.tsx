@@ -12,14 +12,15 @@ import { Feather } from '@expo/vector-icons';
 import { observer } from 'mobx-react';
 
 import useStores from '../hooks/useStores';
+import withPlaylistModal from '../hoc/withPlaylistModal';
 
 function PlayerBottomBar({
   onPress,
-  openPlaylist,
+  openPlaylistModal,
   style,
 }: {
   onPress: (e: GestureResponderEvent) => void;
-  openPlaylist: () => void;
+  openPlaylistModal: () => void;
   style?: ViewStyle;
 }) {
   const {
@@ -59,7 +60,7 @@ function PlayerBottomBar({
           </TouchableOpacity>
           <TouchableOpacity
             style={{ padding: 8, paddingLeft: 5 }}
-            onPress={openPlaylist}
+            onPress={openPlaylistModal}
           >
             <Feather name="list" size={40} />
           </TouchableOpacity>
@@ -110,4 +111,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default observer(PlayerBottomBar);
+export default withPlaylistModal(observer(PlayerBottomBar));

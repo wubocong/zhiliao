@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   GestureResponderEvent,
 } from 'react-native';
-import { Text, MenuItem, OverflowMenu, Modal } from '@ui-kitten/components';
+import { Text, MenuItem, OverflowMenu } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 import { observer } from 'mobx-react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,14 +16,12 @@ import 'mobx-react-lite/batchingForReactNative';
 
 import PlayerBottomBar from '../components/PlayerBottomBar';
 import SongItem from '../components/SongItem';
-import MusicbillList from '../components/MusicbillList';
-import { RootStackParamList, MainStackParamList, Song } from '../types';
+import { RootStackParamList, MainStackParamList } from '../types';
 import { ScrollView } from 'react-native-gesture-handler';
 import zlFetch from '../utils/zlFetch';
 import storesContext from '../store';
 
 type State = {
-  addToMusicbillModalVisible: boolean;
   topBarMenuVisible: boolean;
 };
 @observer
@@ -41,17 +39,14 @@ export default class MusicbillScreen extends React.Component<
   ) {
     super(props);
     this.state = {
-      addToMusicbillModalVisible: false,
       topBarMenuVisible: false,
     };
   }
   componentDidMount() {
+    this.context.globalStore.setNavigation(this.props.navigation);
     if (!this.props.route.params.name) this.props.navigation.replace('Home');
     // else this._getMusicbillDetail();
   }
-  _closeAddToMusicbillModal = () => {
-    this.setState({ addToMusicbillModalVisible: false });
-  };
   _closeTopBarMenu = () => {
     this.setState({ topBarMenuVisible: false });
   };
@@ -73,15 +68,10 @@ export default class MusicbillScreen extends React.Component<
     if (this.props.navigation.canGoBack()) this.props.navigation.goBack();
     else this.props.navigation.replace('Home');
   };
-  _openAddToMusicbillModal = () => {
-    this.setState({ addToMusicbillModalVisible: true });
-  };
   _openPlayer = (e: GestureResponderEvent) => {
     e.preventDefault(); // 防止web端点击穿透
     if (this.context.playerStore.currentSong)
-      this.props.navigation.navigate('Player', {
-        openPlaylist: this.props.route.params.openPlaylist,
-      });
+      this.props.navigation.navigate('Player');
   };
   _openTopBarMenu = () => {
     this.setState({ topBarMenuVisible: true });
@@ -96,11 +86,8 @@ export default class MusicbillScreen extends React.Component<
   render() {
     const name = this.props.route.params?.name;
     if (!name) return null;
-    const { openPlaylist } = this.props.route.params;
-    const { addSongToPlaylistAndPlay } = this.context.playerStore;
     const { musicbillList } = this.context.musicbillStore;
     const currentMusicbillId = this.props.route.params.id;
-    const { addToMusicbillModalVisible } = this.state;
     const songList = musicbillList.find(
       (musicbill) => musicbill.id === currentMusicbillId
     )!.music_list;
@@ -171,8 +158,6 @@ export default class MusicbillScreen extends React.Component<
               <SongItem
                 key={song.id}
                 song={song}
-                addSongToPlaylistAndPlay={addSongToPlaylistAndPlay}
-                openAddToMusicbillModal={this._openAddToMusicbillModal}
                 currentMusicbillId={currentMusicbillId}
               />
             ))}
@@ -181,18 +166,7 @@ export default class MusicbillScreen extends React.Component<
 
         <PlayerBottomBar
           onPress={this._openPlayer}
-          openPlaylist={openPlaylist}
         />
-
-        <Modal
-          visible={addToMusicbillModalVisible}
-          backdropStyle={styles.backdrop}
-          onBackdropPress={this._closeAddToMusicbillModal}
-        >
-          <MusicbillList
-            closeAddToMusicbillModal={this._closeAddToMusicbillModal}
-          />
-        </Modal>
       </SafeAreaView>
     );
   }

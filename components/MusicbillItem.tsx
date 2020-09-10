@@ -33,7 +33,7 @@ function MusicbillItem({
 }) {
   const {
     musicbillStore: { deleteMusicbill },
-    globalStore: { setCloseModalFunction },
+    globalStore: { pushCloseModalFunction },
   } = useStores();
   const [menuVisible, setMenuVisible] = useState(false);
 
@@ -41,7 +41,7 @@ function MusicbillItem({
     setMenuVisible(false);
   };
   const openMenu = () => {
-    setCloseModalFunction(closeMenu);
+    pushCloseModalFunction(closeMenu);
     setMenuVisible(true);
   };
   return (

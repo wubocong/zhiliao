@@ -4,10 +4,14 @@ import Toast from 'react-native-root-toast';
 
 import { Song, Musicbill } from '../types';
 import zlFetch from '../utils/zlFetch';
+import GlobalStore from './GlobalStore';
 
 export default class MusicbillStore {
+  constructor(globalStore: GlobalStore) {
+    this.globalStore = globalStore;
+  }
+  globalStore: GlobalStore;
   @observable musicbillList: Musicbill[] = [];
-  @observable operatingSong?: Song;
   @action setMusicbillList = (musicbillList: Musicbill[]) => {
     this.musicbillList = musicbillList;
     this.musicbillList.forEach((musicbill) => {
@@ -15,47 +19,53 @@ export default class MusicbillStore {
     });
     this._persistMusicbillList();
   };
-  @action setOperatingSong = (operatingSong?: Song) => {
-    this.operatingSong = operatingSong;
-  };
 
   @action addSongToMusicbill = async (
     song: Song,
     musicbillId: string,
-    callback: () => void
+    callback?: () => void
   ) => {
     try {
-      await zlFetch('https://engine.mebtte.com/1/musicbill/music', {
-        token: true,
-        body: JSON.stringify({
-          musicbill_id: musicbillId,
-          music_id: this.operatingSong!.id,
-        }),
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      Toast.show('添加成功');
-
       const musicbill = this.musicbillList.find(
         (item) => item.id === musicbillId
       )!;
       if (!musicbill.music_list.find((item) => item.id === song.id)) {
+        await zlFetch(
+          'https://engine.mebtte.com/1/musicbill/music',
+          {
+            token: true,
+            body: JSON.stringify({
+              musicbill_id: musicbillId,
+              music_id: song.id,
+            }),
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          },
+          this.globalStore.navigation
+        );
         musicbill.music_list.push(song);
+        Toast.show('添加成功');
         this._persistMusicbillList();
+      } else {
+        Toast.show('歌曲已存在歌单中');
       }
-      callback();
+      callback && callback();
     } catch (err) {
       Toast.show(err.message);
     }
   };
   @action deleteMusicbill = async (musicbillId: string) => {
     try {
-      await zlFetch(`https://engine.mebtte.com/1/musicbill?id=${musicbillId}`, {
-        token: true,
-        method: 'DELETE',
-      });
+      await zlFetch(
+        `https://engine.mebtte.com/1/musicbill?id=${musicbillId}`,
+        {
+          token: true,
+          method: 'DELETE',
+        },
+        this.globalStore.navigation
+      );
 
       const index = this.musicbillList.findIndex(
         (musicbill) => musicbill.id === musicbillId
@@ -75,7 +85,8 @@ export default class MusicbillStore {
         {
           token: true,
           method: 'DELETE',
-        }
+        },
+        this.globalStore.navigation
       );
 
       const musicbill = this.musicbillList.find(
@@ -98,9 +109,10 @@ export default class MusicbillStore {
         'https://engine.mebtte.com/1/musicbill/list',
         {
           token: typeof token === 'string' ? token : true,
-        }
+        },
+        this.globalStore.navigation
       )) as Musicbill[];
-      this.setMusicbillList(musicbillList);
+
       await Promise.all(
         musicbillList.map(async (musicbill) => {
           try {
@@ -108,25 +120,29 @@ export default class MusicbillStore {
               `https://engine.mebtte.com/1/musicbill?id=${musicbill.id}`,
               {
                 token: typeof token === 'string' ? token : true,
-              }
+              },
+              this.globalStore.navigation
             );
-            this.mergeOneMusicbill(musicbillDetail);
+            this.mergeOneMusicbill(musicbillDetail, musicbillList);
           } catch (err) {
             Toast.show(err.message);
           }
         })
       );
+      this.setMusicbillList(musicbillList);
     } catch (err) {
       Toast.show(err.message);
     }
   };
-  @action mergeOneMusicbill = (musicbill: Musicbill) => {
-    const index = this.musicbillList.findIndex(
-      (item) => item.id === musicbill.id
-    );
+  @action mergeOneMusicbill = (
+    musicbill: Musicbill,
+    musicbillList?: Musicbill[]
+  ) => {
+    const temp = musicbillList ? musicbillList : this.musicbillList;
+    const index = temp.findIndex((item) => item.id === musicbill.id);
     if (index !== -1) {
-      Object.assign(this.musicbillList[index], musicbill);
-      this._persistMusicbillList();
+      Object.assign(temp[index], musicbill);
+      !musicbillList && this._persistMusicbillList();
     }
   };
   _persistMusicbillList = async () => {

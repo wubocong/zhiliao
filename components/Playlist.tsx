@@ -14,8 +14,25 @@ import {
   LOOPING_TYPE_RANDOM,
 } from '../constants/Player';
 import useStores from '../hooks/useStores';
+import withConfirm from '../hoc/withConfirm';
 
-function Playlist() {
+function Playlist({
+  confirm,
+}: {
+  confirm: ({
+    callback,
+    cancelButtonText,
+    confirmButtonText,
+    content,
+    title,
+  }: {
+    callback: () => void;
+    cancelButtonText?: string;
+    confirmButtonText?: string;
+    content: JSX.Element | string;
+    title?: string;
+  }) => void;
+}) {
   const {
     playerStore: {
       clearPlaylist,
@@ -83,7 +100,15 @@ function Playlist() {
               <Text>收藏全部</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity onPress={clearPlaylist}>
+          <TouchableOpacity
+            onPress={() =>
+              confirm({
+                content: '确认清空播放列表吗？',
+                confirmButtonText: '清空',
+                callback: clearPlaylist,
+              })
+            }
+          >
             <Feather name="trash-2" size={16} color="black" />
           </TouchableOpacity>
         </View>
@@ -151,4 +176,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-export default observer(Playlist);
+export default withConfirm(observer(Playlist));

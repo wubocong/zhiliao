@@ -20,6 +20,7 @@ import { RootStackParamList, MainStackParamList } from '../types';
 import Layout from '../constants/Device';
 import { LOOPING_TYPE_ALL, LOOPING_TYPE_ONE } from '../constants/Player';
 import storesContext from '../store';
+import withPlaylistModal from '../hoc/withPlaylistModal';
 
 type State = {
   currentValue: number;
@@ -27,8 +28,10 @@ type State = {
 };
 
 @observer
-export default class PlayerScreen extends React.Component<
-  StackScreenProps<RootStackParamList & MainStackParamList, 'Player'>,
+class PlayerScreen extends React.Component<
+  StackScreenProps<RootStackParamList & MainStackParamList, 'Player'> & {
+    openPlaylistModal: () => void;
+  },
   State
 > {
   rotateValue = new Animated.Value(0);
@@ -51,7 +54,10 @@ export default class PlayerScreen extends React.Component<
   static contextType = storesContext;
   context!: React.ContextType<typeof storesContext>;
   constructor(
-    props: StackScreenProps<RootStackParamList & MainStackParamList, 'Player'>
+    props: StackScreenProps<
+      RootStackParamList & MainStackParamList,
+      'Player'
+    > & { openPlaylistModal: () => void }
   ) {
     super(props);
     this.state = {
@@ -60,6 +66,7 @@ export default class PlayerScreen extends React.Component<
     };
   }
   componentDidMount() {
+    this.context.globalStore.setNavigation(this.props.navigation);
     if (!this.context.playerStore.currentSong)
       this.props.navigation.replace('Home');
     else if (this.context.playerStore.status.isPlaying)
@@ -114,7 +121,7 @@ export default class PlayerScreen extends React.Component<
     const { currentSong } = this.context.playerStore;
     if (!currentSong) return null;
     const { setLoopingType, nextSong } = this.context.playerStore;
-    const { openPlaylist } = this.props.route.params;
+    const { openPlaylistModal } = this.props;
     const {
       isPlaying,
       loopingType,
@@ -198,7 +205,7 @@ export default class PlayerScreen extends React.Component<
             <TouchableOpacity onPress={nextSong.bind(null, true)}>
               <Feather name="skip-forward" size={24}></Feather>
             </TouchableOpacity>
-            <TouchableOpacity onPress={openPlaylist}>
+            <TouchableOpacity onPress={openPlaylistModal}>
               <Feather name="list" size={24} />
             </TouchableOpacity>
           </View>
@@ -251,3 +258,5 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 });
+
+export default withPlaylistModal(PlayerScreen);

@@ -1,34 +1,27 @@
-import { StackNavigationProp } from '@react-navigation/stack';
+
 import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
-import { Layout, Input, Text, Modal } from '@ui-kitten/components';
+import { StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { Layout, Input } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 import Toast from 'react-native-root-toast';
+import { observer } from 'mobx-react';
 
 import SongItem from './SongItem';
-import MusicbillList from './MusicbillList';
-import { MainStackParamList, RootStackParamList } from '../types';
 import { Song } from '../types';
 import Device from '../constants/Device';
 import zlFetch from '../utils/zlFetch';
+import useStores from '../hooks/useStores';
 
 function SearchTab({
-  addSongToPlaylistAndPlay,
-  navigation,
   shouldHavePadding,
 }: {
-  addSongToPlaylistAndPlay: (song: Song) => void;
-  navigation: StackNavigationProp<
-    MainStackParamList & RootStackParamList,
-    'Home'
-  >;
   shouldHavePadding: boolean;
 }) {
   const [inputText, onChangeInputText] = useState('');
   const [songList, setSongList] = useState([]);
-  const [addToMusicbillModalVisible, setAddToMusicbillModalVisible] = useState(
-    false
-  );
+  const {
+    globalStore: { navigation },
+  } = useStores();
   const search = async () => {
     try {
       const data = await zlFetch(
@@ -44,12 +37,6 @@ function SearchTab({
     } catch (err) {
       Toast.show(err.message);
     }
-  };
-  const openAddToMusicbillModal = () => {
-    setAddToMusicbillModalVisible(true);
-  };
-  const closeAddToMusicbillModal = () => {
-    setAddToMusicbillModalVisible(false);
   };
   return (
     <Layout
@@ -71,23 +58,11 @@ function SearchTab({
       />
       <ScrollView>
         <Layout level="1">
-          {songList.map((song: Song, index) => (
-            <SongItem
-              key={song.id}
-              song={song}
-              addSongToPlaylistAndPlay={addSongToPlaylistAndPlay}
-              openAddToMusicbillModal={openAddToMusicbillModal}
-            />
+          {songList.map((song: Song) => (
+            <SongItem key={song.id} song={song} />
           ))}
         </Layout>
       </ScrollView>
-      <Modal
-        visible={addToMusicbillModalVisible}
-        backdropStyle={styles.backdrop}
-        onBackdropPress={closeAddToMusicbillModal}
-      >
-        <MusicbillList closeAddToMusicbillModal={closeAddToMusicbillModal} />
-      </Modal>
     </Layout>
   );
 }
@@ -105,4 +80,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SearchTab;
+export default observer(SearchTab);

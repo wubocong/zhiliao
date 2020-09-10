@@ -21,13 +21,12 @@ function App() {
 
   // 统一处理按返回键行为
   const {
-    globalStore: { closeModalFunction,setCloseModalFunction },
+    globalStore: { closeModalFunctionStack },
   } = useStores();
   useEffect(() => {
     function onHardwareBackPress() {
-      if (typeof closeModalFunction === 'function') {
-        closeModalFunction();
-        setCloseModalFunction(undefined);
+      if (closeModalFunctionStack.length > 0) {
+        closeModalFunctionStack.pop()!();
         return true;
       }
       return false;
@@ -36,7 +35,7 @@ function App() {
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', onHardwareBackPress);
     };
-  }, [closeModalFunction]);
+  }, [closeModalFunctionStack]);
   if (!isLoadingComplete) {
     return null;
   } else {

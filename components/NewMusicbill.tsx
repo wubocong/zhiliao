@@ -7,9 +7,15 @@ import Device from '../constants/Device';
 import zlFetch from '../utils/zlFetch';
 import useStores from '../hooks/useStores';
 
-export default function NewMusicbill({ onCancel }: { onCancel: () => void }) {
+export default function NewMusicbill({
+  closeNewMusicbillModal,
+}: {
+  closeNewMusicbillModal: () => void;
+}) {
   const [title, setTitle] = useState('');
-  const { musicbillStore } = useStores();
+  const {
+    musicbillStore: { loadAllMusicbillDetail },
+  } = useStores();
   const onSubmit = async () => {
     try {
       await zlFetch('https://engine.mebtte.com/1/musicbill', {
@@ -22,28 +28,22 @@ export default function NewMusicbill({ onCancel }: { onCancel: () => void }) {
           'Content-Type': 'application/json',
         },
       });
-      const musicbillList = await zlFetch(
-        'https://engine.mebtte.com/1/musicbill/list',
-        {
-          token: true,
-        }
-      );
-      musicbillStore.setMusicbillList(musicbillList);
-      onCancel();
+      await loadAllMusicbillDetail();
+      closeNewMusicbillModal();
     } catch (err) {
       Toast.show(err.message);
     }
   };
   return (
     <Layout style={styles.container} level="1">
-      <Text style={{ marginBottom: 8, fontSize: 18 }}>新建歌单</Text>
+      <Text style={styles.modalTitle}>新建歌单</Text>
       <Input
         placeholder="请输入歌单标题"
         value={title}
         onChangeText={setTitle}
       />
       <View style={styles.buttons}>
-        <Button appearance="ghost" onPress={onCancel}>
+        <Button appearance="ghost" onPress={closeNewMusicbillModal}>
           取消
         </Button>
         <Button disabled={!title} appearance="ghost" onPress={onSubmit}>
@@ -57,6 +57,10 @@ const styles = StyleSheet.create({
   container: {
     width: Device.window.width - 40,
     padding: 20,
+  },
+  modalTitle: {
+    padding: 20,
+    fontSize: 18,
   },
   buttons: {
     flexDirection: 'row',
