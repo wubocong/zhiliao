@@ -23,6 +23,10 @@
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
+    },
+    "android": {
+      "package": "com.wubocong.zhiliao",
+      "versionCode": 1
     }
   }
 }
