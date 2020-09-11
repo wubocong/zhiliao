@@ -11,6 +11,7 @@ import SearchTab from '../components/SearchTab';
 import MineTab from '../components/MineTab';
 import { MainStackParamList, RootStackParamList } from '../types';
 import storesContext from '../store';
+import OptionTab from '../components/OptionTab';
 
 type State = {
   selectedIndex: number;
@@ -54,7 +55,6 @@ export default class HomeScreen extends React.Component<
   };
   render() {
     const { playlist } = this.context.playerStore;
-    const { navigation } = this.props;
     const { selectedIndex } = this.state;
     return (
       <SafeAreaView style={styles.container}>
@@ -64,14 +64,14 @@ export default class HomeScreen extends React.Component<
           onSelect={this._setSelectedIndex}
         >
           <Tab title="我的">
-            <MineTab
-              shouldHavePadding={playlist.length !== 0}
-            />
+            <MineTab />
           </Tab>
           <Tab title="发现">
-            <SearchTab
-              shouldHavePadding={playlist.length !== 0}
-            />
+            <SearchTab />
+          </Tab>
+
+          <Tab title="设置">
+            <OptionTab />
           </Tab>
         </TabView>
         <PlayerBottomBar onPress={this._openPlayer} />

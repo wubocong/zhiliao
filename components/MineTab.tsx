@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, TouchableOpacity, View, ScrollView } from 'react-native';
-import { Layout, Text, Modal } from '@ui-kitten/components';
+import { Layout, Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 import { observer } from 'mobx-react';
 
@@ -11,13 +11,12 @@ import withNewMusicbillModal from '../hoc/withNewMusicbillModal';
 
 function MineTab({
   openNewMusicbillModal,
-  shouldHavePadding,
 }: {
   openNewMusicbillModal: () => void;
-  shouldHavePadding: boolean;
 }) {
   const {
     musicbillStore: { musicbillList, loadAllMusicbillDetail },
+    playerStore: { currentSong },
     globalStore: { navigation },
   } = useStores();
   useEffect(() => {
@@ -26,7 +25,7 @@ function MineTab({
   return (
     <Layout
       level="1"
-      style={[styles.container, { paddingBottom: shouldHavePadding ? 85 : 0 }]}
+      style={[styles.container, { paddingBottom: currentSong ? 85 : 0 }]}
     >
       <ScrollView>
         <Layout level="1">

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Layout, Input } from '@ui-kitten/components';
@@ -12,14 +11,11 @@ import Device from '../constants/Device';
 import zlFetch from '../utils/zlFetch';
 import useStores from '../hooks/useStores';
 
-function SearchTab({
-  shouldHavePadding,
-}: {
-  shouldHavePadding: boolean;
-}) {
+function SearchTab() {
   const [inputText, onChangeInputText] = useState('');
   const [songList, setSongList] = useState([]);
   const {
+    playerStore: { currentSong },
     globalStore: { navigation },
   } = useStores();
   const search = async () => {
@@ -41,7 +37,7 @@ function SearchTab({
   return (
     <Layout
       level="1"
-      style={[styles.container, { paddingBottom: shouldHavePadding ? 85 : 0 }]}
+      style={[styles.container, { paddingBottom: currentSong ? 85 : 0 }]}
     >
       <Input
         style={styles.input}
