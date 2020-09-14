@@ -35,10 +35,7 @@ function SearchTab() {
     }
   };
   return (
-    <Layout
-      level="1"
-      style={[styles.container, { paddingBottom: currentSong ? 85 : 0 }]}
-    >
+    <Layout level="1" style={styles.container}>
       <Input
         style={styles.input}
         placeholder="音乐"
@@ -52,7 +49,12 @@ function SearchTab() {
         onSubmitEditing={search}
         returnKeyType="search"
       />
-      <ScrollView>
+      <ScrollView
+        style={{
+          paddingBottom: currentSong ? 85 : 0,
+          height: Device.window.height - 126,
+        }}
+      >
         <Layout level="1">
           {songList.map((song: Song) => (
             <SongItem key={song.id} song={song} />
@@ -65,7 +67,6 @@ function SearchTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    height: Device.window.height - 54, // 不设置height web无法滚动
   },
   input: {
     margin: 20,

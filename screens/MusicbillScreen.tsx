@@ -20,6 +20,7 @@ import { RootStackParamList, MainStackParamList } from '../types';
 import { ScrollView } from 'react-native-gesture-handler';
 import zlFetch from '../utils/zlFetch';
 import storesContext from '../store';
+import Device from '../constants/Device';
 
 type State = {
   topBarMenuVisible: boolean;
@@ -87,6 +88,7 @@ export default class MusicbillScreen extends React.Component<
     const name = this.props.route.params?.name;
     if (!name) return null;
     const { musicbillList } = this.context.musicbillStore;
+    const { currentSong } = this.context.playerStore;
     const currentMusicbillId = this.props.route.params.id;
     const songList = musicbillList.find(
       (musicbill) => musicbill.id === currentMusicbillId
@@ -152,7 +154,12 @@ export default class MusicbillScreen extends React.Component<
             <Text>播放全部(共{songList.length}首)</Text>
           </TouchableOpacity>
         )}
-        <ScrollView>
+        <ScrollView
+          style={{
+            height: Device.window.height - 128,
+            paddingBottom: currentSong ? 85 : 0,
+          }}
+        >
           <View>
             {songList.map((song) => (
               <SongItem
@@ -164,9 +171,7 @@ export default class MusicbillScreen extends React.Component<
           </View>
         </ScrollView>
 
-        <PlayerBottomBar
-          onPress={this._openPlayer}
-        />
+        <PlayerBottomBar onPress={this._openPlayer} />
       </SafeAreaView>
     );
   }

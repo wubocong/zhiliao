@@ -9,6 +9,7 @@ import Layout from '../constants/Device';
 import useStores from '../hooks/useStores';
 import withNewMusicbillModal from '../hoc/withNewMusicbillModal';
 import { Song } from '../types';
+import Device from '../constants/Device';
 
 function MusicbillList({
   openNewMusicbillModal,
@@ -25,7 +26,7 @@ function MusicbillList({
   return (
     <View style={styles.container}>
       <Text style={styles.modalTitle}>收藏到歌单</Text>
-      <ScrollView>
+      <ScrollView style={{ maxHeight: Device.window.height - 224 }}>
         <View>
           <TouchableOpacity
             style={styles.newMusicbill}

@@ -125,8 +125,8 @@ class PlayerScreen extends React.Component<
     const {
       isPlaying,
       loopingType,
-      playerInstancePosition,
-      playerInstanceDuration,
+      playbackInstancePosition,
+      playbackInstanceDuration,
     } = this.context.playerStore.status;
     const rotateDegree = this.rotateValue.interpolate({
       inputRange: [0, 1],
@@ -180,7 +180,7 @@ class PlayerScreen extends React.Component<
               value={
                 this.state.isSliding
                   ? this.state.currentValue
-                  : playerInstancePosition / playerInstanceDuration
+                  : playbackInstancePosition / playbackInstanceDuration
               }
             />
           </View>

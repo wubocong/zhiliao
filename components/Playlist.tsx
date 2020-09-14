@@ -15,6 +15,7 @@ import {
 } from '../constants/Player';
 import useStores from '../hooks/useStores';
 import withConfirm from '../hoc/withConfirm';
+import Device from '../constants/Device';
 
 function Playlist({
   confirm,
@@ -113,7 +114,7 @@ function Playlist({
           </TouchableOpacity>
         </View>
       </View>
-      <ScrollView>
+      <ScrollView style={{ maxHeight: Device.window.height - 212 }}>
         <View>
           {playlist.map((song) => (
             <TouchableOpacity

@@ -14,13 +14,7 @@ function MusicbillItem({
   onPress,
   showMoreButton = false,
 }: {
-  confirm: ({
-    callback,
-    cancelButtonText,
-    confirmButtonText,
-    content,
-    title,
-  }: {
+  confirm: (params: {
     callback: () => void;
     cancelButtonText?: string;
     confirmButtonText?: string;

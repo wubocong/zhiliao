@@ -7,10 +7,11 @@ import {
   LOOPING_TYPE_ONE,
   LOOPING_TYPE_RANDOM,
 } from '../constants/Player';
+import Toast from 'react-native-root-toast';
 
 type PlayerStatus = {
-  playerInstancePosition?: number;
-  playerInstanceDuration?: number;
+  playbackInstancePosition?: number;
+  playbackInstanceDuration?: number;
   shouldPlay?: boolean;
   isPlaying?: boolean;
   isBuffering?: boolean;
@@ -21,12 +22,12 @@ type PlayerStatus = {
   shouldCorrectPitch?: boolean;
 };
 export default class PlayerStore {
-  playerInstance: Audio.Sound | null = null;
+  playbackInstance: Audio.Sound | null = null;
   @observable playlist: Song[] = [];
   @observable currentSong?: Song;
   @observable status = {
-    playerInstancePosition: 0,
-    playerInstanceDuration: 1,
+    playbackInstancePosition: 0,
+    playbackInstanceDuration: 1,
     shouldPlay: false,
     isPlaying: false,
     isBuffering: false,
@@ -66,8 +67,8 @@ export default class PlayerStore {
     if (song.id === currentSong?.id) {
       if (playlist.length === 1) {
         this.currentSong = undefined;
-        await this.playerInstance?.unloadAsync();
-        this.playerInstance = null;
+        await this.playbackInstance?.unloadAsync();
+        this.playbackInstance = null;
       } else {
         const nextSongIndex =
           (playlist.findIndex((item) => item.id === song.id) + 1) %
@@ -101,6 +102,7 @@ export default class PlayerStore {
     }
   };
   @action playAfterCurrentSong = (song: Song) => {
+    if (song.id === this.currentSong?.id) return;
     const index = this._getSongIndexInPlaylist(song);
     if (index !== -1) this.playlist.splice(index, 1);
     this.playlist.splice(
@@ -114,48 +116,44 @@ export default class PlayerStore {
     const { loopingType } = this.status;
     if (loopingType !== newLoopingType) {
       if (loopingType === LOOPING_TYPE_ONE)
-        await this.playerInstance?.setIsLoopingAsync(false);
+        await this.playbackInstance?.setIsLoopingAsync(false);
       else if (newLoopingType === LOOPING_TYPE_ONE)
-        await this.playerInstance?.setIsLoopingAsync(true);
+        await this.playbackInstance?.setIsLoopingAsync(true);
       this.status.loopingType = newLoopingType;
     }
   };
   setPosition = (value: number) => {
-    const { playerInstanceDuration } = this.status;
-    if (playerInstanceDuration)
-      this.playerInstance?.setPositionAsync(
-        Math.round(value * playerInstanceDuration)
+    const { playbackInstanceDuration } = this.status;
+    if (playbackInstanceDuration)
+      this.playbackInstance?.setPositionAsync(
+        Math.round(value * playbackInstanceDuration)
       );
   };
   @action switchSong = (song: Song) => {
     this.currentSong = song;
-    this._loadSong(song.normal);
+    this._loadSong(song);
   };
   @action unloadSong = async () => {
     this.currentSong = undefined;
-    if (this.playerInstance) {
-      await this.playerInstance.unloadAsync();
-      this.playerInstance = null;
+    if (this.playbackInstance) {
+      await this.playbackInstance.unloadAsync();
+      this.playbackInstance = null;
     }
   };
   togglePlay = () => {
-    if (!this.playerInstance) {
-      if (this.currentSong) this._loadSong(this.currentSong.normal);
+    if (this.status.isPlaying) {
+      this.playbackInstance!.pauseAsync();
     } else {
-      if (this.status.isPlaying) {
-        this.playerInstance.pauseAsync();
-      } else {
-        this.playerInstance.playAsync();
-      }
+      this.playbackInstance!.playAsync();
     }
   };
   _getSongIndexInPlaylist = (song?: Song) => {
     return this.playlist.findIndex((item) => item.id === song?.id);
   };
-  _loadSong = async (uri: string) => {
-    if (this.playerInstance) {
-      await this.playerInstance.unloadAsync();
-      this.playerInstance = null;
+  _loadSong = async (song: Song) => {
+    if (this.playbackInstance) {
+      await this.playbackInstance.unloadAsync();
+      this.playbackInstance = null;
     }
     const {
       rate,
@@ -165,7 +163,7 @@ export default class PlayerStore {
       shouldCorrectPitch,
     } = this.status;
     const initialStatus = {
-      shouldPlay: true,
+      shouldPlay: false,
       rate: rate,
       isMuted: isMuted,
       volume: volume,
@@ -174,18 +172,27 @@ export default class PlayerStore {
       // // UNCOMMENT THIS TO TEST THE OLD androidImplementation:
       // androidImplementation: 'MediaPlayer',
     };
-    const { sound } = await Audio.Sound.createAsync(
-      { uri },
-      initialStatus,
-      this._onPlayerStatusUpdate
-    );
-    this.playerInstance = sound;
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: song.normal },
+        initialStatus,
+        this._onPlayerStatusUpdate
+      );
+      if (this.currentSong?.id === song.id) {
+        this.playbackInstance = sound;
+        await this.playbackInstance.playAsync();
+      } else {
+        await sound.unloadAsync();
+      }
+    } catch (err) {
+      Toast.show(err.message);
+    }
   };
   @action _onPlayerStatusUpdate = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
       const newStatus = {
-        playerInstancePosition: status.positionMillis,
-        playerInstanceDuration: status.durationMillis,
+        playbackInstancePosition: status.positionMillis,
+        playbackInstanceDuration: status.durationMillis,
         shouldPlay: status.shouldPlay,
         isPlaying: status.isPlaying,
         isBuffering: status.isBuffering,
