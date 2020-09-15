@@ -43,11 +43,6 @@ export default class HomeScreen extends React.Component<
     });
     this.context.globalStore.setNavigation(this.props.navigation);
   }
-  _openPlayer = (e: GestureResponderEvent) => {
-    e.preventDefault(); // 防止web端点击穿透
-    const { currentSong } = this.context.playerStore;
-    if (currentSong) this.props.navigation.navigate('Player');
-  };
 
   _setSelectedIndex = (selectedIndex: number) => {
     // react-native-web的bug，打开modal时会以NaN为参数调用这个方法
@@ -74,7 +69,7 @@ export default class HomeScreen extends React.Component<
             <OptionTab />
           </Tab>
         </TabView>
-        <PlayerBottomBar onPress={this._openPlayer} />
+        <PlayerBottomBar />
       </SafeAreaView>
     );
   }

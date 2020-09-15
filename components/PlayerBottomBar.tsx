@@ -15,11 +15,9 @@ import useStores from '../hooks/useStores';
 import withPlaylistModal from '../hoc/withPlaylistModal';
 
 function PlayerBottomBar({
-  onPress,
   openPlaylistModal,
   style,
 }: {
-  onPress: (e: GestureResponderEvent) => void;
   openPlaylistModal: () => void;
   style?: ViewStyle;
 }) {
@@ -29,10 +27,16 @@ function PlayerBottomBar({
       togglePlay,
       status: { isPlaying },
     },
+    globalStore: { navigation },
   } = useStores();
 
   return currentSong ? (
-    <TouchableOpacity style={[styles.wrapper, style]} onPress={onPress}>
+    <TouchableOpacity
+      style={[styles.wrapper, style]}
+      onPress={() => {
+        navigation?.navigate('Player');
+      }}
+    >
       <Layout style={styles.container} level="2">
         <View style={styles.songWrapper}>
           <Image style={styles.cover} source={{ uri: currentSong.cover }} />

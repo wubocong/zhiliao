@@ -8,11 +8,13 @@ export default function useLocalData() {
   const {
     musicbillStore: { setMusicbillList, loadAllMusicbillDetail },
   } = useStores();
+
   useEffect(() => {
     (async function () {
       try {
         const token = await AsyncStorage.getItem('token');
         if (!token) return;
+
         const musicbillList = await AsyncStorage.getItem('musicbillList');
         if (musicbillList) setMusicbillList(JSON.parse(musicbillList));
         else await loadAllMusicbillDetail();

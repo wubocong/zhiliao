@@ -7,6 +7,7 @@ import { Song } from '../types';
 import useStores from '../hooks/useStores';
 import withConfirm from '../hoc/withConfirm';
 import withMusicbillListModal from '../hoc/withMusicbillListModal';
+import { observer } from 'mobx-react';
 
 function SongItem({
   confirm,
@@ -33,9 +34,16 @@ function SongItem({
 }) {
   const {
     musicbillStore: { deleteSongFromMusicbill },
-    playerStore: { playAfterCurrentSong, addSongToPlaylistAndPlay },
-    globalStore: { pushCloseModalFunction, popCloseModalFunction },
+    playerStore: {
+      playAfterCurrentSong,
+      addSongToPlaylistAndPlay,
+      currentSong,
+      status: { isPlaying },
+      togglePlay,
+    },
+    globalStore: { pushCloseModalFunction, popCloseModalFunction, navigation },
   } = useStores();
+  const isCurrentSong = currentSong?.id === song.id;
   const [menuVisible, setMenuVisible] = useState(false);
   const closeMenu = () => {
     popCloseModalFunction();
@@ -54,15 +62,27 @@ function SongItem({
       style={styles.songItem}
       onPress={(e) => {
         e.preventDefault(); // 处理 react-native-web bug
-        addSongToPlaylistAndPlay(song);
+        if (isCurrentSong) {
+          if (isPlaying) navigation?.navigate('Player');
+          else togglePlay();
+        } else addSongToPlaylistAndPlay(song);
       }}
     >
       <View style={styles.songInfo}>
-        <Text>{song.name}</Text>
+        <Text status={isCurrentSong ? 'primary' : 'basic'}>{song.name}</Text>
         <View style={styles.singerWrapper}>
-          <Text style={styles.singer}>{song.singers[0].name}</Text>
+          <Text
+            status={isCurrentSong ? 'primary' : 'basic'}
+            style={styles.singer}
+          >
+            {song.singers[0].name}
+          </Text>
           {song.singers.slice(1).map((singer, index) => (
-            <Text style={styles.singer} key={index}>
+            <Text
+              status={isCurrentSong ? 'primary' : 'basic'}
+              style={styles.singer}
+              key={index}
+            >
               {'&' + singer.name}
             </Text>
           ))}
@@ -145,4 +165,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default withMusicbillListModal(withConfirm(SongItem));
+export default withMusicbillListModal(withConfirm(observer(SongItem)));

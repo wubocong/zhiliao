@@ -67,11 +67,6 @@ export default class MusicbillScreen extends React.Component<
     if (this.props.navigation.canGoBack()) this.props.navigation.goBack();
     else this.props.navigation.replace('Home');
   };
-  _openPlayer = (e: GestureResponderEvent) => {
-    e.preventDefault(); // 防止web端点击穿透
-    if (this.context.playerStore.currentSong)
-      this.props.navigation.navigate('Player');
-  };
   _openTopBarMenu = () => {
     this.setState({ topBarMenuVisible: true });
   };
@@ -90,7 +85,7 @@ export default class MusicbillScreen extends React.Component<
     const currentMusicbillId = this.props.route.params.id;
     const songList = musicbillList.find(
       (musicbill) => musicbill.id === currentMusicbillId
-    )!.music_list;
+    )?.music_list;
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.topBar}>
@@ -141,7 +136,7 @@ export default class MusicbillScreen extends React.Component<
             </OverflowMenu>
           </View>
         </View>
-        {songList.length > 0 && (
+        {songList && songList.length > 0 && (
           <TouchableOpacity style={styles.playAll} onPress={this._playAll}>
             <Feather
               name="play-circle"
@@ -159,7 +154,7 @@ export default class MusicbillScreen extends React.Component<
           }}
         >
           <View>
-            {songList.map((song) => (
+            {songList?.map((song) => (
               <SongItem
                 key={song.id}
                 song={song}
@@ -169,7 +164,7 @@ export default class MusicbillScreen extends React.Component<
           </View>
         </ScrollView>
 
-        <PlayerBottomBar onPress={this._openPlayer} />
+        <PlayerBottomBar />
       </SafeAreaView>
     );
   }

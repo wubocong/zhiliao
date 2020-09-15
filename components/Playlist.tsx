@@ -119,7 +119,9 @@ function Playlist({
           {playlist.map((song) => (
             <TouchableOpacity
               style={styles.songItem}
-              onPress={() => switchSong(song)}
+              onPress={() => {
+                if (currentSong?.id !== song.id) switchSong(song);
+              }}
               key={song.id}
             >
               <Text

@@ -22,6 +22,18 @@ type PlayerStatus = {
   shouldCorrectPitch?: boolean;
 };
 export default class PlayerStore {
+  constructor() {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('play', this.togglePlay);
+      navigator.mediaSession.setActionHandler('pause', this.togglePlay);
+      // navigator.mediaSession.setActionHandler('seekbackward', function () { });
+      // navigator.mediaSession.setActionHandler('seekforward', function () { });
+      navigator.mediaSession.setActionHandler('previoustrack', () =>
+        this.nextSong(false)
+      );
+      navigator.mediaSession.setActionHandler('nexttrack', this.nextSong);
+    }
+  }
   playbackInstance: Audio.Sound | null = null;
   @observable playlist: Song[] = [];
   @observable currentSong?: Song;
@@ -151,6 +163,23 @@ export default class PlayerStore {
     return this.playlist.findIndex((item) => item.id === song?.id);
   };
   _loadSong = async (song: Song) => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: song.name,
+        artist: song.singers.reduce(
+          (str, singer, index) => str + (index === 0 ? '' : '&') + singer.name,
+          ''
+        ),
+        // album: 'ALBUM',
+        artwork: [
+          {
+            sizes: '320x320', // <- MUST BE EXACTLY!
+            src: song.cover,
+            type: '',
+          },
+        ],
+      });
+    }
     if (this.playbackInstance) {
       await this.playbackInstance.unloadAsync();
       this.playbackInstance = null;

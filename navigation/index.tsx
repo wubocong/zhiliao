@@ -18,17 +18,13 @@ import LinkingConfiguration from './LinkingConfiguration';
 
 import useLocalData from '../hooks/useLocalData';
 import useStores from '../hooks/useStores';
+import { observer } from 'mobx-react';
 
 // If you are not familiar with React Navigation, we recommend going through the
 // "Fundamentals" guide: https://reactnavigation.org/docs/getting-started
-export default function Navigation({
-  colorScheme,
-}: {
-  colorScheme: ColorSchemeName;
-}) {
+function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   // 歌单数据本地缓存
   useLocalData();
-
   // 统一处理按返回键行为
   const {
     globalStore: { closeModalFunctionStack },
@@ -56,6 +52,7 @@ export default function Navigation({
     </NavigationContainer>
   );
 }
+export default observer(Navigation);
 
 // A root stack navigator is often used for displaying modals on top of all other content
 // Read more here: https://reactnavigation.org/docs/modal
