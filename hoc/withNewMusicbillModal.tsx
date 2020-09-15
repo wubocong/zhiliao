@@ -31,6 +31,7 @@ export default function withNewMusicbillModal<Props extends InjectProps>(
       this.setState({ modalVisibile: true });
     };
     _closeModal = () => {
+      this.context.globalStore.popCloseModalFunction();
       this.setState({ modalVisibile: false });
     };
     render() {

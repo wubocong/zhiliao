@@ -29,6 +29,7 @@ export default function withPlaylistModal<Props extends InjectProps>(WrappedComp
       this.setState({ modalVisibile: true });
     };
     _closeModal = () => {
+      this.context.globalStore.popCloseModalFunction();
       this.setState({ modalVisibile: false });
     };
     render() {

@@ -11,8 +11,6 @@ import { Feather } from '@expo/vector-icons';
 import { observer } from 'mobx-react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-root-toast';
-import 'mobx-react-lite/batchingForReactDom';
-import 'mobx-react-lite/batchingForReactNative';
 
 import PlayerBottomBar from '../components/PlayerBottomBar';
 import SongItem from '../components/SongItem';

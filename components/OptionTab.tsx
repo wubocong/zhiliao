@@ -4,10 +4,12 @@ import { Layout, Text } from '@ui-kitten/components';
 import { Feather } from '@expo/vector-icons';
 import { observer } from 'mobx-react';
 import * as Updates from 'expo-updates';
+import { brand } from 'expo-device';
 
 import Device from '../constants/Device';
 import useStores from '../hooks/useStores';
 import withConfirm from '../hoc/withConfirm';
+import Toast from 'react-native-root-toast';
 
 function OptionTab({
   confirm,
@@ -32,10 +34,26 @@ function OptionTab({
           height: Device.window.height - 55,
         }}
       >
-        <TouchableOpacity onPress={() => {}}>
-          <Text>检查更新</Text>
-        </TouchableOpacity>
-        <Layout level="1"></Layout>
+        {brand && (
+          <TouchableOpacity
+            style={styles.item}
+            onPress={async () => {
+              const { isAvailable } = await Updates.checkForUpdateAsync();
+              if (isAvailable) {
+                confirm({
+                  confirmButtonText: '更新',
+                  callback: async () => {
+                    const { isNew } = await Updates.fetchUpdateAsync();
+                    if (isNew) await Updates.reloadAsync();
+                  },
+                  content: '是否更新？',
+                });
+              } else Toast.show('已是最新版本');
+            }}
+          >
+            <Text>检查更新</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </Layout>
   );
@@ -44,6 +62,9 @@ function OptionTab({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  item: {
+    padding: 20,
   },
 });
 

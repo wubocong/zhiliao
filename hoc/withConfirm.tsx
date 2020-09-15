@@ -66,6 +66,7 @@ export default function withConfirm<Props extends InjectProps>(
       });
     };
     _closeModal = () => {
+      this.context.globalStore.popCloseModalFunction();
       this.setState({ modalVisibile: false });
     };
     _onConfirm = () => {

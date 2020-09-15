@@ -34,10 +34,11 @@ function SongItem({
   const {
     musicbillStore: { deleteSongFromMusicbill },
     playerStore: { playAfterCurrentSong, addSongToPlaylistAndPlay },
-    globalStore: { pushCloseModalFunction },
+    globalStore: { pushCloseModalFunction, popCloseModalFunction },
   } = useStores();
   const [menuVisible, setMenuVisible] = useState(false);
   const closeMenu = () => {
+    popCloseModalFunction();
     setMenuVisible(false);
   };
   const openMenu = () => {

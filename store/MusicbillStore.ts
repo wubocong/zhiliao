@@ -1,4 +1,4 @@
-import { observable, action } from 'mobx';
+import { observable, action, observe } from 'mobx';
 import AsyncStorage from '@react-native-community/async-storage';
 import Toast from 'react-native-root-toast';
 

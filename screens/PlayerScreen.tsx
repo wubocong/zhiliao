@@ -12,6 +12,7 @@ import { Feather } from '@expo/vector-icons';
 import { observer } from 'mobx-react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
+import { observe } from 'mobx';
 
 import LoopAll from '../components/png/LoopAll';
 import LoopOne from '../components/png/LoopOne';
@@ -69,8 +70,17 @@ class PlayerScreen extends React.Component<
     this.context.globalStore.setNavigation(this.props.navigation);
     if (!this.context.playerStore.currentSong)
       this.props.navigation.replace('Home');
-    else if (this.context.playerStore.status.isPlaying)
-      this.rotateAnimation.start();
+    else {
+      observe(
+        this.context.playerStore.status,
+        'isPlaying',
+        (change) => {
+          if (change.newValue) this.rotateAnimation.start();
+          else this._stopAnimation();
+        },
+        true
+      );
+    }
   }
   componentDidUpdate() {
     if (!this.context.playerStore.currentSong)
@@ -86,41 +96,38 @@ class PlayerScreen extends React.Component<
   _onSlidingStart = (currentValue: number) => {
     this.setState({ isSliding: true, currentValue });
   };
-  _togglePlay = () => {
-    if (this.context.playerStore.status.isPlaying) {
-      this.rotateValue.stopAnimation((value) => {
-        this.rotateValue = new Animated.Value(value);
-        this.rotateAnimation = Animated.loop(
-          Animated.sequence([
-            Animated.timing(this.rotateValue, {
-              duration: Math.floor(20000 * (1 - value)),
-              toValue: 1,
-              useNativeDriver: false,
-              easing: Easing.linear,
-            }),
-            Animated.timing(this.rotateValue, {
-              duration: 0,
-              toValue: 0,
-              useNativeDriver: false,
-              easing: Easing.linear,
-            }),
-            Animated.timing(this.rotateValue, {
-              duration: Math.floor(20000 * value),
-              toValue: value,
-              useNativeDriver: false,
-              easing: Easing.linear,
-            }),
-          ])
-        );
-      });
-    } else this.rotateAnimation.start();
-    this.context.playerStore.togglePlay();
+  _stopAnimation = () => {
+    this.rotateValue.stopAnimation((value) => {
+      this.rotateValue = new Animated.Value(value);
+      this.rotateAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(this.rotateValue, {
+            duration: Math.floor(20000 * (1 - value)),
+            toValue: 1,
+            useNativeDriver: false,
+            easing: Easing.linear,
+          }),
+          Animated.timing(this.rotateValue, {
+            duration: 0,
+            toValue: 0,
+            useNativeDriver: false,
+            easing: Easing.linear,
+          }),
+          Animated.timing(this.rotateValue, {
+            duration: Math.floor(20000 * value),
+            toValue: value,
+            useNativeDriver: false,
+            easing: Easing.linear,
+          }),
+        ])
+      );
+    });
   };
   render() {
     // 直接访问这个页面不渲染任何东西
     const { currentSong } = this.context.playerStore;
     if (!currentSong) return null;
-    const { setLoopingType, nextSong } = this.context.playerStore;
+    const { setLoopingType, nextSong, togglePlay } = this.context.playerStore;
     const { openPlaylistModal } = this.props;
     const {
       isPlaying,
@@ -199,7 +206,7 @@ class PlayerScreen extends React.Component<
               <Feather
                 name={isPlaying ? 'pause-circle' : 'play-circle'}
                 size={48}
-                onPress={this._togglePlay}
+                onPress={togglePlay}
               ></Feather>
             </TouchableOpacity>
             <TouchableOpacity onPress={nextSong.bind(null, true)}>

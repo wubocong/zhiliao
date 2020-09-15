@@ -12,6 +12,9 @@ export default class GlobalStore {
   @action pushCloseModalFunction = (func: () => void) => {
     this.closeModalFunctionStack.push(func);
   };
+  @action popCloseModalFunction = () => {
+    this.closeModalFunctionStack.pop();
+  };
   @action setNavigation = (navigation: Navigation) => {
     this.navigation = navigation;
   };
