@@ -24,14 +24,17 @@ type PlayerStatus = {
 export default class PlayerStore {
   constructor() {
     if ('mediaSession' in navigator) {
-      navigator.mediaSession.setActionHandler('play', this.togglePlay);
-      navigator.mediaSession.setActionHandler('pause', this.togglePlay);
+      navigator.mediaSession!.setActionHandler('play', this.togglePlay);
+      navigator.mediaSession!.setActionHandler('pause', this.togglePlay);
       // navigator.mediaSession.setActionHandler('seekbackward', function () { });
       // navigator.mediaSession.setActionHandler('seekforward', function () { });
-      navigator.mediaSession.setActionHandler('previoustrack', () =>
+      navigator.mediaSession!.setActionHandler('previoustrack', () =>
         this.nextSong(false)
       );
-      navigator.mediaSession.setActionHandler('nexttrack', this.nextSong);
+      navigator.mediaSession!.setActionHandler(
+        'nexttrack',
+        () => this.nextSong
+      );
     }
   }
   playbackInstance: Audio.Sound | null = null;
@@ -164,7 +167,7 @@ export default class PlayerStore {
   };
   _loadSong = async (song: Song) => {
     if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
+      navigator.mediaSession!.metadata = new MediaMetadata({
         title: song.name,
         artist: song.singers.reduce(
           (str, singer, index) => str + (index === 0 ? '' : '&') + singer.name,

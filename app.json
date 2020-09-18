@@ -1,8 +1,9 @@
 {
   "expo": {
     "name": "知了",
-    "slug": "zhiliao-native",
-    "version": "1.0.0",
+    "slug": "zhiliao",
+    "version": "0.1.0",
+    "owner": "warriorwu",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -22,11 +23,15 @@
       "supportsTablet": true
     },
     "web": {
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "lang": "zh-cn",
+      "themeColor": "#000000",
+      "display": "standalone"
     },
     "android": {
       "package": "com.wubocong.zhiliao",
       "versionCode": 1
-    }
+    },
+    "description": ""
   }
 }
