@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Input, Button, Text, Layout } from '@ui-kitten/components';
 import { View, StyleSheet } from 'react-native';
-import Toast from 'react-native-root-toast';
 
 import Device from '../constants/Device';
 import zlFetch from '../utils/zlFetch';
@@ -17,22 +16,18 @@ export default function NewMusicbill({
     musicbillStore: { loadAllMusicbillDetail },
   } = useStores();
   const onSubmit = async () => {
-    try {
-      await zlFetch('https://engine.mebtte.com/1/musicbill', {
-        token: true,
-        body: JSON.stringify({
-          name: title,
-        }),
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      await loadAllMusicbillDetail();
-      closeNewMusicbillModal();
-    } catch (err) {
-      Toast.show(err.message);
-    }
+    await zlFetch('https://engine.mebtte.com/1/musicbill', {
+      token: true,
+      body: JSON.stringify({
+        name: title,
+      }),
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    await loadAllMusicbillDetail();
+    closeNewMusicbillModal();
   };
   return (
     <Layout style={styles.container} level="1">

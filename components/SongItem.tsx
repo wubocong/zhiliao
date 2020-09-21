@@ -70,23 +70,16 @@ function SongItem({
     >
       <View style={styles.songInfo}>
         <Text status={isCurrentSong ? 'primary' : 'basic'}>{song.name}</Text>
-        <View style={styles.singerWrapper}>
-          <Text
-            status={isCurrentSong ? 'primary' : 'basic'}
-            style={styles.singer}
-          >
-            {song.singers[0].name}
-          </Text>
-          {song.singers.slice(1).map((singer, index) => (
-            <Text
-              status={isCurrentSong ? 'primary' : 'basic'}
-              style={styles.singer}
-              key={index}
-            >
-              {'&' + singer.name}
-            </Text>
-          ))}
-        </View>
+        <Text
+          status={isCurrentSong ? 'primary' : 'basic'}
+          style={styles.singer}
+        >
+          {song.singers.reduce(
+            (str, singer, index) =>
+              str + (index === 0 ? '' : '&') + singer.name,
+            ''
+          )}
+        </Text>
       </View>
       <OverflowMenu
         anchor={() => (
@@ -153,9 +146,6 @@ const styles = StyleSheet.create({
   songInfo: {
     flexDirection: 'column',
     justifyContent: 'space-between',
-  },
-  singerWrapper: {
-    flexDirection: 'row',
   },
   singer: {
     fontSize: 12,

@@ -156,9 +156,9 @@ export default class PlayerStore {
     }
   };
   togglePlay = () => {
-    if (this.status.isPlaying) {
+    if (this.status.isPlaying === true) {
       this.playbackInstance!.pauseAsync();
-    } else {
+    } else if (this.status.isPlaying === false) {
       this.playbackInstance!.playAsync();
     }
   };
