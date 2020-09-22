@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import Toast from 'react-native-root-toast';
 import AsyncStorage from '@react-native-community/async-storage';
 
 import useStores from '../hooks/useStores';
@@ -7,20 +6,31 @@ import useStores from '../hooks/useStores';
 export default function useLocalData() {
   const {
     musicbillStore: { setMusicbillList, loadAllMusicbillDetail },
+    playerStore: { setCurrentSong, mergeStatus, setPlaylist },
   } = useStores();
 
   useEffect(() => {
     (async function () {
-      try {
-        const token = await AsyncStorage.getItem('token');
-        if (!token) return;
+      const token = await AsyncStorage.getItem('token');
+      if (!token) return;
 
-        const musicbillList = await AsyncStorage.getItem('musicbillList');
-        if (musicbillList) setMusicbillList(JSON.parse(musicbillList));
-        else await loadAllMusicbillDetail();
-      } catch (err) {
-        Toast.show(err.message);
-      }
+      const [
+        [, currentSong],
+        [, playbackStatus],
+        [, playlist],
+        [, musicbillList],
+      ] = await AsyncStorage.multiGet([
+        'currentSong',
+        'playbackStatus',
+        'playlist',
+        'musicbillList',
+      ]);
+      if (currentSong && currentSong !== 'undefined')
+        setCurrentSong(JSON.parse(currentSong), false);
+      if (playbackStatus) mergeStatus(JSON.parse(playbackStatus));
+      if (playlist) setPlaylist(JSON.parse(playlist), false);
+      if (musicbillList) setMusicbillList(JSON.parse(musicbillList));
+      else await loadAllMusicbillDetail();
     })();
   }, []);
 }

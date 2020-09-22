@@ -19,20 +19,16 @@ function SearchTab() {
     globalStore: { navigation },
   } = useStores();
   const search = async () => {
-    try {
-      const data = await zlFetch(
-        `https://engine.mebtte.com/1/music/list?key=keyword&value=${encodeURI(
-          inputText
-        )}`,
-        {
-          token: true,
-        },
-        navigation
-      );
-      setSongList(data);
-    } catch (err) {
-      Toast.show(err.message);
-    }
+    const data = await zlFetch(
+      `https://engine.mebtte.com/1/music/list?key=keyword&value=${encodeURI(
+        inputText
+      )}`,
+      {
+        token: true,
+      },
+      navigation
+    );
+    setSongList(data);
   };
   return (
     <Layout level="1" style={styles.container}>

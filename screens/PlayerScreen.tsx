@@ -22,6 +22,7 @@ import Layout from '../constants/Device';
 import { LOOPING_TYPE_ALL, LOOPING_TYPE_ONE } from '../constants/Player';
 import storesContext from '../store';
 import withPlaylistModal from '../hoc/withPlaylistModal';
+import { ms2minutesecond } from '../utils/timeFormat';
 
 type State = {
   currentValue: number;
@@ -132,8 +133,8 @@ class PlayerScreen extends React.Component<
     const {
       isPlaying,
       loopingType,
-      playbackInstancePosition,
-      playbackInstanceDuration,
+      positionMillis,
+      durationMillis,
     } = this.context.playerStore.status;
     const rotateDegree = this.rotateValue.interpolate({
       inputRange: [0, 1],
@@ -187,14 +188,22 @@ class PlayerScreen extends React.Component<
               value={
                 this.state.isSliding
                   ? this.state.currentValue
-                  : playbackInstancePosition / playbackInstanceDuration
+                  : positionMillis! / durationMillis!
               }
             />
+            <View style={styles.timeBar}>
+              <Text style={styles.timeText}>
+                {ms2minutesecond(positionMillis!)}
+              </Text>
+              <Text style={styles.timeText}>
+                {ms2minutesecond(durationMillis!)}
+              </Text>
+            </View>
           </View>
           <View style={styles.controller}>
             <TouchableOpacity
               style={{ width: 22, height: 22 }}
-              onPress={() => setLoopingType((loopingType + 1) % 3)}
+              onPress={() => setLoopingType((loopingType! + 1) % 3)}
             >
               <LoopIcon />
             </TouchableOpacity>
@@ -255,6 +264,13 @@ const styles = StyleSheet.create({
   progressBar: {
     width: '100%',
     height: 40,
+  },
+  timeBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  timeText: {
+    fontSize: 12,
   },
   controller: {
     width: '100%',

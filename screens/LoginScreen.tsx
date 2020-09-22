@@ -28,44 +28,35 @@ export default function LoginScreen({
     setNavigation(navigation);
   }, []);
   const sendCaptcha = async () => {
-    try {
-      await zlFetch(
-        `https://engine.mebtte.com/1/verify_code?type=signin&email=${email}`
-      );
-      Toast.show('验证码已发送');
-      setCaptchaCoolDown(false);
-      setTimeout(() => {
-        setCaptchaCoolDown(true);
-      }, 60 * 1000);
-    } catch (err) {
-      Toast.show(err.message);
-    }
+    await zlFetch(
+      `https://engine.mebtte.com/1/verify_code?type=signin&email=${email}`
+    );
+    Toast.show('验证码已发送');
+    setCaptchaCoolDown(false);
+    setTimeout(() => {
+      setCaptchaCoolDown(true);
+    }, 60 * 1000);
   };
   const login = async () => {
-    try {
-      const data = await zlFetch(
-        'https://engine.mebtte.com/1/user/signin',
-        {
-          body: JSON.stringify({
-            email,
-            verify_code: captcha,
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          method: 'POST',
-        }
-      );
-      Toast.show('登录成功');
-      await Promise.all([
-        loadAllMusicbillDetail(data.token),
-        AsyncStorage.setItem('user_info', JSON.stringify(data)),
-        AsyncStorage.setItem('token', data.token),
-      ]);
-      navigation.replace('Home');
-    } catch (err) {
-      Toast.show(err.message);
-    }
+    const data = await zlFetch('https://engine.mebtte.com/1/user/signin', {
+      body: JSON.stringify({
+        email,
+        verify_code: captcha,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    });
+    Toast.show('登录成功');
+    await Promise.all([
+      loadAllMusicbillDetail(data.token),
+      AsyncStorage.multiSet([
+        ['user_info', JSON.stringify(data)],
+        ['token', data.token],
+      ]),
+    ]);
+    navigation.replace('Home');
   };
   useEffect(() => {
     AsyncStorage.getItem('token').then((token) => {

@@ -8,6 +8,7 @@ import useStores from '../hooks/useStores';
 import withConfirm from '../hoc/withConfirm';
 import withMusicbillListModal from '../hoc/withMusicbillListModal';
 import { observer } from 'mobx-react';
+import Device from '../constants/Device';
 
 function SongItem({
   confirm,
@@ -69,10 +70,15 @@ function SongItem({
       }}
     >
       <View style={styles.songInfo}>
-        <Text status={isCurrentSong ? 'primary' : 'basic'}>{song.name}</Text>
+        <Text
+          style={[styles.songName, styles.textEllipsis]}
+          status={isCurrentSong ? 'primary' : 'basic'}
+        >
+          {song.name}
+        </Text>
         <Text
           status={isCurrentSong ? 'primary' : 'basic'}
-          style={styles.singer}
+          style={[styles.singer, styles.textEllipsis]}
         >
           {song.singers.reduce(
             (str, singer, index) =>
@@ -147,8 +153,17 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'space-between',
   },
+  songName: {
+    width: (Device.window.width - 80) * 0.8,
+  },
   singer: {
     fontSize: 12,
+    width: (Device.window.width - 80) * 0.8,
+  },
+  textEllipsis: {
+    overflow: 'hidden',
+    // whiteSpace: 'noWrap',
+    // textOverflow: 'ellipsis',
   },
   moreButton: {
     padding: 20,

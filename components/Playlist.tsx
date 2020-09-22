@@ -53,7 +53,7 @@ function Playlist({
         </Text>
         <View style={styles.actionBar}>
           <TouchableOpacity
-            onPress={() => setLoopingType((loopingType + 1) % 3)}
+            onPress={() => setLoopingType((loopingType! + 1) % 3)}
           >
             <View
               style={[
@@ -174,9 +174,11 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
   },
   songText: {
+    fontSize: 14,
     overflow: 'hidden',
-    width: 200,
-    fontSize: 16,
+    // whiteSpace: 'noWrap',
+    // textOverflow: 'ellipsis',
+    width: (Device.window.width - 104) * 0.8,
   },
 });
 export default withConfirm(observer(Playlist));

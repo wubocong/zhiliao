@@ -50,18 +50,14 @@ export default class MusicbillScreen extends React.Component<
     this.setState({ topBarMenuVisible: false });
   };
   _getMusicbillDetail = async () => {
-    try {
-      const data = await zlFetch(
-        `https://engine.mebtte.com/1/musicbill?id=${this.props.route.params.id}`,
-        {
-          token: true,
-        },
-        this.props.navigation
-      );
-      this.context.musicbillStore.mergeOneMusicbill(data);
-    } catch (err) {
-      Toast.show(err.message);
-    }
+    const data = await zlFetch(
+      `https://engine.mebtte.com/1/musicbill?id=${this.props.route.params.id}`,
+      {
+        token: true,
+      },
+      this.props.navigation
+    );
+    this.context.musicbillStore.mergeOneMusicbill(data);
   };
   _goBack = () => {
     if (this.props.navigation.canGoBack()) this.props.navigation.goBack();

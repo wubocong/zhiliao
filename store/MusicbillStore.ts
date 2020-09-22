@@ -25,114 +25,92 @@ export default class MusicbillStore {
     musicbillId: string,
     callback?: () => void
   ) => {
-    try {
-      const musicbill = this.musicbillList.find(
-        (item) => item.id === musicbillId
-      )!;
-      if (!musicbill.music_list.find((item) => item.id === song.id)) {
-        await zlFetch(
-          'https://engine.mebtte.com/1/musicbill/music',
-          {
-            token: true,
-            body: JSON.stringify({
-              musicbill_id: musicbillId,
-              music_id: song.id,
-            }),
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          },
-          this.globalStore.navigation
-        );
-        musicbill.music_list.push(song);
-        Toast.show('添加成功');
-        this._persistMusicbillList();
-      } else {
-        Toast.show('歌曲已存在歌单中');
-      }
-      callback && callback();
-    } catch (err) {
-      Toast.show(err.message);
-    }
-  };
-  @action deleteMusicbill = async (musicbillId: string) => {
-    try {
+    const musicbill = this.musicbillList.find(
+      (item) => item.id === musicbillId
+    )!;
+    if (!musicbill.music_list.find((item) => item.id === song.id)) {
       await zlFetch(
-        `https://engine.mebtte.com/1/musicbill?id=${musicbillId}`,
+        'https://engine.mebtte.com/1/musicbill/music',
         {
           token: true,
-          method: 'DELETE',
+          body: JSON.stringify({
+            musicbill_id: musicbillId,
+            music_id: song.id,
+          }),
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
         this.globalStore.navigation
       );
+      musicbill.music_list.push(song);
+      Toast.show('添加成功');
+      this._persistMusicbillList();
+    } else {
+      Toast.show('歌曲已存在歌单中');
+    }
+    callback && callback();
+  };
+  @action deleteMusicbill = async (musicbillId: string) => {
+    await zlFetch(
+      `https://engine.mebtte.com/1/musicbill?id=${musicbillId}`,
+      {
+        token: true,
+        method: 'DELETE',
+      },
+      this.globalStore.navigation
+    );
 
-      const index = this.musicbillList.findIndex(
-        (musicbill) => musicbill.id === musicbillId
-      );
-      if (index !== -1) {
-        this.musicbillList.splice(index, 1);
-        this._persistMusicbillList();
-      }
-    } catch (err) {
-      Toast.show(err.message);
+    const index = this.musicbillList.findIndex(
+      (musicbill) => musicbill.id === musicbillId
+    );
+    if (index !== -1) {
+      this.musicbillList.splice(index, 1);
+      this._persistMusicbillList();
     }
   };
   @action deleteSongFromMusicbill = async (song: Song, musicbillId: string) => {
-    try {
-      await zlFetch(
-        `https://engine.mebtte.com/1/musicbill/music?musicbill_id=${musicbillId}&music_id=${song.id}`,
-        {
-          token: true,
-          method: 'DELETE',
-        },
-        this.globalStore.navigation
-      );
+    await zlFetch(
+      `https://engine.mebtte.com/1/musicbill/music?musicbill_id=${musicbillId}&music_id=${song.id}`,
+      {
+        token: true,
+        method: 'DELETE',
+      },
+      this.globalStore.navigation
+    );
 
-      const musicbill = this.musicbillList.find(
-        (item) => item.id === musicbillId
-      )!;
-      const index = musicbill.music_list.findIndex(
-        (item) => item.id === song.id
-      );
-      if (index !== -1) {
-        musicbill.music_list.splice(index, 1);
-        this._persistMusicbillList();
-      }
-    } catch (err) {
-      Toast.show(err.message);
+    const musicbill = this.musicbillList.find(
+      (item) => item.id === musicbillId
+    )!;
+    const index = musicbill.music_list.findIndex((item) => item.id === song.id);
+    if (index !== -1) {
+      musicbill.music_list.splice(index, 1);
+      this._persistMusicbillList();
     }
   };
   @action loadAllMusicbillDetail = async (token?: any) => {
-    try {
-      const musicbillList = (await zlFetch(
-        'https://engine.mebtte.com/1/musicbill/list',
-        {
-          token: typeof token === 'string' ? token : true,
-        },
-        this.globalStore.navigation
-      )) as Musicbill[];
+    const musicbillList = (await zlFetch(
+      'https://engine.mebtte.com/1/musicbill/list',
+      {
+        token: typeof token === 'string' ? token : true,
+      },
+      this.globalStore.navigation
+    )) as Musicbill[];
 
-      await Promise.all(
-        musicbillList.map(async (musicbill) => {
-          try {
-            const musicbillDetail = await zlFetch(
-              `https://engine.mebtte.com/1/musicbill?id=${musicbill.id}`,
-              {
-                token: typeof token === 'string' ? token : true,
-              },
-              this.globalStore.navigation
-            );
-            this.mergeOneMusicbill(musicbillDetail, musicbillList);
-          } catch (err) {
-            Toast.show(err.message);
-          }
-        })
-      );
-      this.setMusicbillList(musicbillList);
-    } catch (err) {
-      Toast.show(err.message);
-    }
+    await Promise.all(
+      musicbillList.map(async (musicbill) => {
+        const musicbillDetail = await zlFetch(
+          `https://engine.mebtte.com/1/musicbill?id=${musicbill.id}`,
+          {
+            token: typeof token === 'string' ? token : true,
+          },
+          this.globalStore.navigation
+        );
+        this.mergeOneMusicbill(musicbillDetail, musicbillList);
+      })
+    );
+    this.setMusicbillList(musicbillList);
   };
   @action mergeOneMusicbill = (
     musicbill: Musicbill,

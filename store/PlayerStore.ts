@@ -1,5 +1,6 @@
 import { observable, action } from 'mobx';
 import { Audio, AVPlaybackStatus } from 'expo-av';
+import { throttle } from 'lodash';
 
 import { Song } from '../types';
 import {
@@ -7,11 +8,11 @@ import {
   LOOPING_TYPE_ONE,
   LOOPING_TYPE_RANDOM,
 } from '../constants/Player';
-import Toast from 'react-native-root-toast';
+import AsyncStorage from '@react-native-community/async-storage';
 
 type PlayerStatus = {
-  playbackInstancePosition?: number;
-  playbackInstanceDuration?: number;
+  positionMillis?: number;
+  durationMillis?: number;
   shouldPlay?: boolean;
   isPlaying?: boolean;
   isBuffering?: boolean;
@@ -33,16 +34,16 @@ export default class PlayerStore {
       );
       navigator.mediaSession!.setActionHandler(
         'nexttrack',
-        () => this.nextSong
+        () => this.nextSong()
       );
     }
   }
   playbackInstance: Audio.Sound | null = null;
   @observable playlist: Song[] = [];
   @observable currentSong?: Song;
-  @observable status = {
-    playbackInstancePosition: 0,
-    playbackInstanceDuration: 1,
+  @observable status: PlayerStatus = {
+    positionMillis: 0,
+    durationMillis: 1,
     shouldPlay: false,
     isPlaying: false,
     isBuffering: false,
@@ -52,17 +53,22 @@ export default class PlayerStore {
     loopingType: LOOPING_TYPE_ALL,
     shouldCorrectPitch: true,
   };
-
-  @action setStatus = (statusObject: PlayerStatus) => {
-    Object.assign(this.status, statusObject);
+  @action setStatus = (status: PlayerStatus) => {
+    this.status = status;
   };
-  @action setCurrentSong = (song?: Song) => {
+  @action mergeStatus = (status: PlayerStatus) => {
+    Object.assign(this.status, status);
+  };
+  @action setCurrentSong = async (song?: Song, persist: boolean = true) => {
     this.currentSong = song;
+    this.mergeStatus({ positionMillis: 0, durationMillis: 1 });
+    if (persist)
+      await AsyncStorage.setItem('currentSong', JSON.stringify(song));
   };
-  @action setPlaylist = (playlist: Song[]) => {
+  @action setPlaylist = async (playlist: Song[], persist: boolean = true) => {
     this.playlist = playlist;
+    if (persist) await this._persistPlaylist();
   };
-
   @action addSongToPlaylistAndPlay = (song: Song) => {
     if (this._getSongIndexInPlaylist(song) === -1) {
       this.playlist.splice(
@@ -70,18 +76,20 @@ export default class PlayerStore {
         0,
         song
       );
+      this._persistPlaylist();
     }
     this.switchSong(song);
   };
   @action clearPlaylist = async () => {
     this.playlist = [];
+    this._persistPlaylist();
     this.unloadSong();
   };
   @action deleteSongfromPlaylist = async (song: Song) => {
     const { playlist, currentSong } = this;
     if (song.id === currentSong?.id) {
       if (playlist.length === 1) {
-        this.currentSong = undefined;
+        await this.setCurrentSong(undefined);
         await this.playbackInstance?.unloadAsync();
         this.playbackInstance = null;
       } else {
@@ -92,6 +100,7 @@ export default class PlayerStore {
       }
     }
     this.playlist = playlist.filter((item) => item.id !== song.id);
+    this._persistPlaylist();
   };
   @action nextSong = (forward: boolean = true) => {
     const {
@@ -126,6 +135,7 @@ export default class PlayerStore {
       song
     );
     if (this.playlist.length === 1) this.switchSong(song);
+    this._persistPlaylist();
   };
   @action setLoopingType = async (newLoopingType: number) => {
     const { loopingType } = this.status;
@@ -135,31 +145,36 @@ export default class PlayerStore {
       else if (newLoopingType === LOOPING_TYPE_ONE)
         await this.playbackInstance?.setIsLoopingAsync(true);
       this.status.loopingType = newLoopingType;
+      this._persistStatus();
     }
   };
   setPosition = (value: number) => {
-    const { playbackInstanceDuration } = this.status;
-    if (playbackInstanceDuration)
+    const { durationMillis } = this.status;
+    if (durationMillis)
       this.playbackInstance?.setPositionAsync(
-        Math.round(value * playbackInstanceDuration)
+        Math.round(value * durationMillis)
       );
   };
-  @action switchSong = (song: Song) => {
-    this.currentSong = song;
+  @action switchSong = async (song: Song) => {
+    await this.setCurrentSong(song);
     this._loadSong(song);
   };
   @action unloadSong = async () => {
-    this.currentSong = undefined;
+    await this.setCurrentSong(undefined);
     if (this.playbackInstance) {
       await this.playbackInstance.unloadAsync();
       this.playbackInstance = null;
     }
   };
   togglePlay = () => {
-    if (this.status.isPlaying === true) {
-      this.playbackInstance!.pauseAsync();
-    } else if (this.status.isPlaying === false) {
-      this.playbackInstance!.playAsync();
+    if (!this.playbackInstance) {
+      if (this.currentSong) this._loadSong(this.currentSong);
+    } else {
+      if (this.status.isPlaying === true) {
+        this.playbackInstance!.pauseAsync();
+      } else if (this.status.isPlaying === false) {
+        this.playbackInstance!.playAsync();
+      }
     }
   };
   _getSongIndexInPlaylist = (song?: Song) => {
@@ -193,6 +208,7 @@ export default class PlayerStore {
       volume,
       loopingType,
       shouldCorrectPitch,
+      positionMillis,
     } = this.status;
     const initialStatus = {
       shouldPlay: false,
@@ -201,30 +217,25 @@ export default class PlayerStore {
       volume: volume,
       isLooping: loopingType === LOOPING_TYPE_ONE,
       shouldCorrectPitch: shouldCorrectPitch,
-      // // UNCOMMENT THIS TO TEST THE OLD androidImplementation:
-      // androidImplementation: 'MediaPlayer',
     };
-    try {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: song.normal },
-        initialStatus,
-        this._onPlayerStatusUpdate
-      );
-      if (this.currentSong?.id === song.id) {
-        this.playbackInstance = sound;
-        await this.playbackInstance.playAsync();
-      } else {
-        await sound.unloadAsync();
-      }
-    } catch (err) {
-      Toast.show(err.message);
+    if (positionMillis) Object.assign(initialStatus, { positionMillis });
+    const { sound } = await Audio.Sound.createAsync(
+      { uri: song.normal },
+      initialStatus,
+      this._onPlayerStatusUpdate
+    );
+    if (this.currentSong?.id === song.id) {
+      this.playbackInstance = sound;
+      await this.playbackInstance.playAsync();
+    } else {
+      await sound.unloadAsync();
     }
   };
   @action _onPlayerStatusUpdate = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
       const newStatus = {
-        playbackInstancePosition: status.positionMillis,
-        playbackInstanceDuration: status.durationMillis,
+        positionMillis: status.positionMillis,
+        durationMillis: status.durationMillis,
         shouldPlay: status.shouldPlay,
         isPlaying: status.isPlaying,
         isBuffering: status.isBuffering,
@@ -237,10 +248,24 @@ export default class PlayerStore {
       if (status.isLooping)
         Object.assign(newStatus, { loopingType: LOOPING_TYPE_ONE });
       Object.assign(this.status, newStatus);
+      this._persistStatus();
     } else {
       if (status.error) {
         console.log(`FATAL PLAYER ERROR: ${status.error}`);
       }
     }
+  };
+  _persistStatus = throttle(async () => {
+    const playbackStatus = { ...this.status };
+    delete playbackStatus.isPlaying;
+    delete playbackStatus.isBuffering;
+    delete playbackStatus.shouldPlay;
+    await AsyncStorage.setItem(
+      'playbackStatus',
+      JSON.stringify(playbackStatus)
+    );
+  }, 1000);
+  _persistPlaylist = async () => {
+    await AsyncStorage.setItem('playlist', JSON.stringify(this.playlist));
   };
 }

@@ -49,7 +49,6 @@ export default class HomeScreen extends React.Component<
     if (!Number.isNaN(selectedIndex)) this.setState({ selectedIndex });
   };
   render() {
-    const { playlist } = this.context.playerStore;
     const { selectedIndex } = this.state;
     return (
       <SafeAreaView style={styles.container}>
