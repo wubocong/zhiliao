@@ -32,9 +32,8 @@ export default class PlayerStore {
       navigator.mediaSession!.setActionHandler('previoustrack', () =>
         this.nextSong(false)
       );
-      navigator.mediaSession!.setActionHandler(
-        'nexttrack',
-        () => this.nextSong()
+      navigator.mediaSession!.setActionHandler('nexttrack', () =>
+        this.nextSong()
       );
     }
   }
@@ -61,9 +60,10 @@ export default class PlayerStore {
   };
   @action setCurrentSong = async (song?: Song, persist: boolean = true) => {
     this.currentSong = song;
-    this.mergeStatus({ positionMillis: 0, durationMillis: 1 });
-    if (persist)
+    if (persist) {
+      this.mergeStatus({ positionMillis: 0, durationMillis: 1 });
       await AsyncStorage.setItem('currentSong', JSON.stringify(song));
+    }
   };
   @action setPlaylist = async (playlist: Song[], persist: boolean = true) => {
     this.playlist = playlist;
