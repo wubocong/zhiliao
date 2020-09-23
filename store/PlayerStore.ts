@@ -62,7 +62,8 @@ export default class PlayerStore {
     this.currentSong = song;
     if (persist) {
       this.mergeStatus({ positionMillis: 0, durationMillis: 1 });
-      await AsyncStorage.setItem('currentSong', JSON.stringify(song));
+      if (song) await AsyncStorage.setItem('currentSong', JSON.stringify(song));
+      else await AsyncStorage.removeItem('currentSong');
     }
   };
   @action setPlaylist = async (playlist: Song[], persist: boolean = true) => {
@@ -156,8 +157,12 @@ export default class PlayerStore {
       );
   };
   @action switchSong = async (song: Song) => {
-    await this.setCurrentSong(song);
-    this._loadSong(song);
+    if (this.currentSong?.id === song.id) {
+      this.setPosition(0);
+    } else {
+      await this.setCurrentSong(song);
+      this._loadSong(song);
+    }
   };
   @action unloadSong = async () => {
     await this.setCurrentSong(undefined);
@@ -210,6 +215,7 @@ export default class PlayerStore {
       shouldCorrectPitch,
       positionMillis,
     } = this.status;
+
     const initialStatus = {
       shouldPlay: false,
       rate: rate,
@@ -244,11 +250,9 @@ export default class PlayerStore {
         volume: status.volume,
         shouldCorrectPitch: status.shouldCorrectPitch,
       };
-      if (status.didJustFinish && !status.isLooping) this.nextSong();
-      if (status.isLooping)
-        Object.assign(newStatus, { loopingType: LOOPING_TYPE_ONE });
       Object.assign(this.status, newStatus);
       this._persistStatus();
+      if (status.didJustFinish && !status.isLooping) this.nextSong();
     } else {
       if (status.error) {
         console.log(`FATAL PLAYER ERROR: ${status.error}`);

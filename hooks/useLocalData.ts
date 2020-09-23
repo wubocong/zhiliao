@@ -25,7 +25,7 @@ export default function useLocalData() {
         'playlist',
         'musicbillList',
       ]);
-      if (currentSong && currentSong !== 'undefined')
+      if (currentSong)
         setCurrentSong(JSON.parse(currentSong), false);
       if (playbackStatus) mergeStatus(JSON.parse(playbackStatus));
       if (playlist) setPlaylist(JSON.parse(playlist), false);
