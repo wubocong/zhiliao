@@ -6,7 +6,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "eject": "expo eject",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "publish:github": "expo export --public-url https://zhiliao-app.github.io -f; cd dist; git add .;git commit -m '发布bundle'; git push origin master;"
   },
   "jest": {
     "preset": "jest-expo"

@@ -2,7 +2,7 @@
   "expo": {
     "name": "知了",
     "slug": "zhiliao",
-    "version": "0.1.0",
+    "version": "0.1.2",
     "owner": "warriorwu",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

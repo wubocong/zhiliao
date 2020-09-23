@@ -38,6 +38,7 @@ export default class PlayerStore {
     }
   }
   playbackInstance: Audio.Sound | null = null;
+  unloading: boolean = false;
   @observable playlist: Song[] = [];
   @observable currentSong?: Song;
   @observable status: PlayerStatus = {
@@ -166,9 +167,11 @@ export default class PlayerStore {
   };
   @action unloadSong = async () => {
     await this.setCurrentSong(undefined);
-    if (this.playbackInstance) {
+    if (this.playbackInstance && !this.unloading) {
+      this.unloading = true;
       await this.playbackInstance.unloadAsync();
       this.playbackInstance = null;
+      this.unloading = false;
     }
   };
   togglePlay = () => {
@@ -203,9 +206,11 @@ export default class PlayerStore {
         ],
       });
     }
-    if (this.playbackInstance) {
+    if (this.playbackInstance && !this.unloading) {
+      this.unloading = true;
       await this.playbackInstance.unloadAsync();
       this.playbackInstance = null;
+      this.unloading = false;
     }
     const {
       rate,
@@ -225,16 +230,22 @@ export default class PlayerStore {
       shouldCorrectPitch: shouldCorrectPitch,
     };
     if (positionMillis) Object.assign(initialStatus, { positionMillis });
-    const { sound } = await Audio.Sound.createAsync(
-      { uri: song.normal },
-      initialStatus,
-      this._onPlayerStatusUpdate
-    );
-    if (this.currentSong?.id === song.id) {
-      this.playbackInstance = sound;
-      await this.playbackInstance.playAsync();
-    } else {
-      await sound.unloadAsync();
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: song.normal },
+        initialStatus,
+        this._onPlayerStatusUpdate
+      );
+      if (this.currentSong?.id === song.id && !this.playbackInstance) {
+        this.playbackInstance = sound;
+        await this.playbackInstance.playAsync();
+      } else {
+        await sound.unloadAsync();
+      }
+    } catch (err) {
+      setTimeout(() => {
+        if (!this.playbackInstance) this._loadSong(song);
+      }, 1000);
     }
   };
   @action _onPlayerStatusUpdate = (status: AVPlaybackStatus) => {
