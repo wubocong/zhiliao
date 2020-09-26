@@ -39,6 +39,7 @@ export default class PlayerStore {
   }
   playbackInstance: Audio.Sound | null = null;
   unloading: boolean = false;
+  switching: boolean = false;
   @observable playlist: Song[] = [];
   @observable currentSong?: Song;
   @observable status: PlayerStatus = {
@@ -161,8 +162,9 @@ export default class PlayerStore {
     if (this.currentSong?.id === song.id) {
       this.setPosition(0);
     } else {
+      this.switching = true;
       await this.setCurrentSong(song);
-      this._loadSong(song);
+      await this._loadSong(song);
     }
   };
   @action unloadSong = async () => {
@@ -238,6 +240,7 @@ export default class PlayerStore {
       );
       if (this.currentSong?.id === song.id && !this.playbackInstance) {
         this.playbackInstance = sound;
+        this.switching = false;
         await this.playbackInstance.playAsync();
       } else {
         await sound.unloadAsync();
@@ -249,7 +252,7 @@ export default class PlayerStore {
     }
   };
   @action _onPlayerStatusUpdate = (status: AVPlaybackStatus) => {
-    if (status.isLoaded) {
+    if (status.isLoaded && !this.switching) {
       const newStatus = {
         positionMillis: status.positionMillis,
         durationMillis: status.durationMillis,
