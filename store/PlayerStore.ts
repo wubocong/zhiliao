@@ -1,6 +1,6 @@
 import { observable, action } from 'mobx';
 import { Audio, AVPlaybackStatus } from 'expo-av';
-import { throttle } from 'lodash';
+import { throttle, debounce } from 'lodash';
 
 import { Song } from '../types';
 import {
@@ -190,7 +190,7 @@ export default class PlayerStore {
   _getSongIndexInPlaylist = (song?: Song) => {
     return this.playlist.findIndex((item) => item.id === song?.id);
   };
-  _loadSong = async (song: Song) => {
+  _loadSong = debounce(async (song: Song) => {
     if ('mediaSession' in navigator) {
       navigator.mediaSession!.metadata = new MediaMetadata({
         title: song.name,
@@ -250,7 +250,7 @@ export default class PlayerStore {
         if (!this.playbackInstance) this._loadSong(song);
       }, 1000);
     }
-  };
+  }, 350);
   @action _onPlayerStatusUpdate = (status: AVPlaybackStatus) => {
     if (status.isLoaded && !this.switching) {
       const newStatus = {
@@ -268,6 +268,7 @@ export default class PlayerStore {
       this._persistStatus();
       if (status.didJustFinish && !status.isLooping) this.nextSong();
     } else {
+      //
       if (status.error) {
         console.log(`FATAL PLAYER ERROR: ${status.error}`);
       }

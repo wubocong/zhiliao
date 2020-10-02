@@ -3,6 +3,7 @@
 ## 运行
 
 删除node_modules/static-container/StaticContainer.js中static PropTypes声明
+删除node_modules/react-native-root-toast/lib/ToastContainer.js中的ViewStyleProps和Text.Style.Props
 
 ## react-native-web性能优化
 
@@ -17,3 +18,4 @@ export default StyleSheetPropType;
 ```js
 export default function(){return function(){};};
 ```
+
