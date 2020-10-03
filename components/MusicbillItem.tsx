@@ -4,7 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { Text, MenuItem, OverflowMenu } from '@ui-kitten/components';
 import { observer } from 'mobx-react';
 
-import { Musicbill } from '../types';
+import { Musicbill, ConfirmOptions } from '../types';
 import useStores from '../hooks/useStores';
 import withConfirm from '../hoc/withConfirm';
 
@@ -14,13 +14,7 @@ function MusicbillItem({
   onPress,
   showMoreButton = false,
 }: {
-  confirm: (params: {
-    callback: () => void;
-    cancelButtonText?: string;
-    confirmButtonText?: string;
-    content: JSX.Element | string;
-    title?: string;
-  }) => void;
+  confirm: (params: ConfirmOptions) => void;
   musicbill: Musicbill;
   onPress: () => void;
   showMoreButton?: boolean;

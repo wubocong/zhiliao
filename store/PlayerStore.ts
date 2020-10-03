@@ -163,17 +163,9 @@ export default class PlayerStore {
       this.setPosition(0);
     } else {
       this.switching = true;
+      await this.unloadSong(false);
       await this.setCurrentSong(song);
       await this._loadSong(song);
-    }
-  };
-  @action unloadSong = async () => {
-    await this.setCurrentSong(undefined);
-    if (this.playbackInstance && !this.unloading) {
-      this.unloading = true;
-      await this.playbackInstance.unloadAsync();
-      this.playbackInstance = null;
-      this.unloading = false;
     }
   };
   togglePlay = () => {
@@ -187,10 +179,19 @@ export default class PlayerStore {
       }
     }
   };
-  _getSongIndexInPlaylist = (song?: Song) => {
+  @action unloadSong = async (isSwitch: boolean = true) => {
+    if (isSwitch) await this.setCurrentSong(undefined);
+    if (this.playbackInstance && !this.unloading) {
+      this.unloading = true;
+      await this.playbackInstance.unloadAsync();
+      this.playbackInstance = null;
+      this.unloading = false;
+    }
+  };
+  private _getSongIndexInPlaylist = (song?: Song) => {
     return this.playlist.findIndex((item) => item.id === song?.id);
   };
-  _loadSong = debounce(async (song: Song) => {
+  private _loadSong = async (song: Song) => {
     if ('mediaSession' in navigator) {
       navigator.mediaSession!.metadata = new MediaMetadata({
         title: song.name,
@@ -207,12 +208,6 @@ export default class PlayerStore {
           },
         ],
       });
-    }
-    if (this.playbackInstance && !this.unloading) {
-      this.unloading = true;
-      await this.playbackInstance.unloadAsync();
-      this.playbackInstance = null;
-      this.unloading = false;
     }
     const {
       rate,
@@ -241,7 +236,7 @@ export default class PlayerStore {
       if (this.currentSong?.id === song.id && !this.playbackInstance) {
         this.playbackInstance = sound;
         this.switching = false;
-        await this.playbackInstance.playAsync();
+        await this._playSongDebounce();
       } else {
         await sound.unloadAsync();
       }
@@ -250,8 +245,9 @@ export default class PlayerStore {
         if (!this.playbackInstance) this._loadSong(song);
       }, 1000);
     }
-  }, 350);
-  @action _onPlayerStatusUpdate = (status: AVPlaybackStatus) => {
+  };
+  @action
+  private _onPlayerStatusUpdate = (status: AVPlaybackStatus) => {
     if (status.isLoaded && !this.switching) {
       const newStatus = {
         positionMillis: status.positionMillis,
@@ -274,7 +270,7 @@ export default class PlayerStore {
       }
     }
   };
-  _persistStatus = throttle(async () => {
+  private _persistStatus = throttle(async () => {
     const playbackStatus = { ...this.status };
     delete playbackStatus.isPlaying;
     delete playbackStatus.isBuffering;
@@ -284,7 +280,10 @@ export default class PlayerStore {
       JSON.stringify(playbackStatus)
     );
   }, 1000);
-  _persistPlaylist = async () => {
+  private _persistPlaylist = async () => {
     await AsyncStorage.setItem('playlist', JSON.stringify(this.playlist));
   };
+  private _playSongDebounce = debounce(async () => {
+    await this.playbackInstance!.playAsync();
+  }, 350);
 }

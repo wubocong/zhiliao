@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { Text, MenuItem, OverflowMenu } from '@ui-kitten/components';
 
-import { Song } from '../types';
+import { Song, ConfirmOptions } from '../types';
 import useStores from '../hooks/useStores';
 import withConfirm from '../hoc/withConfirm';
 import withMusicbillListModal from '../hoc/withMusicbillListModal';
@@ -16,19 +16,7 @@ function SongItem({
   openMusicbillListModal,
   song,
 }: {
-  confirm: ({
-    callback,
-    cancelButtonText,
-    confirmButtonText,
-    content,
-    title,
-  }: {
-    callback: () => void;
-    cancelButtonText?: string;
-    confirmButtonText?: string;
-    content: JSX.Element | string;
-    title?: string;
-  }) => void;
+  confirm: (params: ConfirmOptions) => void;
   currentMusicbillId?: string;
   openMusicbillListModal: (song: Song) => void;
   song: Song;

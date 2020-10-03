@@ -4,16 +4,9 @@ import { StyleSheet, View } from 'react-native';
 
 import Device from '../constants/Device';
 import storesContext from '../store';
-
-type confirmOptions = {
-  callback: () => void;
-  cancelButtonText?: string;
-  confirmButtonText?: string;
-  content: JSX.Element | string;
-  title?: string;
-};
+import { ConfirmOptions } from '../types';
 interface InjectProps {
-  confirm(params: confirmOptions): void;
+  confirm(params: ConfirmOptions): void;
 }
 export default function withConfirm<Props extends InjectProps>(
   WrappedComponent: React.ComponentType<Props>
@@ -30,7 +23,7 @@ export default function withConfirm<Props extends InjectProps>(
   > {
     static contextType = storesContext;
     context!: React.ContextType<typeof storesContext>;
-    callback?: () => void;
+    callback?: Function;
     static displayName: string;
     constructor(props: Omit<Props, keyof InjectProps>) {
       super(props);
@@ -48,13 +41,7 @@ export default function withConfirm<Props extends InjectProps>(
       confirmButtonText = '确定',
       content,
       title,
-    }: {
-      callback: () => void;
-      cancelButtonText?: string;
-      confirmButtonText?: string;
-      content: JSX.Element | string;
-      title?: string;
-    }) => {
+    }: ConfirmOptions) => {
       this.callback = callback;
       this.context.globalStore.pushCloseModalFunction(this._closeModal);
       this.setState({

@@ -5,23 +5,15 @@ import { Feather } from '@expo/vector-icons';
 import { observer } from 'mobx-react';
 import * as Updates from 'expo-updates';
 import { brand } from 'expo-device';
+import Constants from 'expo-constants';
 
 import Device from '../constants/Device';
 import useStores from '../hooks/useStores';
 import withConfirm from '../hoc/withConfirm';
 import Toast from 'react-native-root-toast';
+import { ConfirmOptions } from '../types';
 
-function OptionTab({
-  confirm,
-}: {
-  confirm: (params: {
-    callback: () => void;
-    cancelButtonText?: string;
-    confirmButtonText?: string;
-    content: JSX.Element | string;
-    title?: string;
-  }) => void;
-}) {
+function OptionTab({ confirm }: { confirm: (params: ConfirmOptions) => void }) {
   const {
     globalStore: { navigation },
     playerStore: { currentSong },
@@ -36,7 +28,10 @@ function OptionTab({
       >
         {brand && (
           <TouchableOpacity
-            style={styles.item}
+            style={[
+              styles.item,
+              { borderTopColor: '#ebebeb', borderTopWidth: 1 },
+            ]}
             onPress={async () => {
               const { isAvailable } = await Updates.checkForUpdateAsync();
               if (isAvailable) {
@@ -54,6 +49,20 @@ function OptionTab({
             <Text>检查更新</Text>
           </TouchableOpacity>
         )}
+        <TouchableOpacity
+          style={[
+            styles.item,
+            !brand && { borderTopColor: '#ebebeb', borderTopWidth: 1 },
+          ]}
+          onPress={() => {
+            confirm({
+              callback: () => {},
+              content: 'Developed By Warrior! & Mebtte',
+            });
+          }}
+        >
+          <Text>版本：v{Constants.manifest.version!}</Text>
+        </TouchableOpacity>
       </ScrollView>
     </Layout>
   );
@@ -65,6 +74,8 @@ const styles = StyleSheet.create({
   },
   item: {
     padding: 20,
+    borderBottomColor: '#ebebeb',
+    borderBottomWidth: 1,
   },
 });
 

@@ -16,24 +16,9 @@ import {
 import useStores from '../hooks/useStores';
 import withConfirm from '../hoc/withConfirm';
 import Device from '../constants/Device';
+import { ConfirmOptions } from '../types';
 
-function Playlist({
-  confirm,
-}: {
-  confirm: ({
-    callback,
-    cancelButtonText,
-    confirmButtonText,
-    content,
-    title,
-  }: {
-    callback: () => void;
-    cancelButtonText?: string;
-    confirmButtonText?: string;
-    content: JSX.Element | string;
-    title?: string;
-  }) => void;
-}) {
+function Playlist({ confirm }: { confirm: (params: ConfirmOptions) => void }) {
   const {
     playerStore: {
       clearPlaylist,

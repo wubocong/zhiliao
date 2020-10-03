@@ -40,3 +40,11 @@ export type Musicbill = {
   name: string;
   order: number;
 };
+
+export type ConfirmOptions = {
+  callback: Function;
+  cancelButtonText?: string;
+  confirmButtonText?: string;
+  content: JSX.Element | string;
+  title?: string;
+};
