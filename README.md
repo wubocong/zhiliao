@@ -1,5 +1,7 @@
 # zhiliao-native
 
+基于expo的仿网易云的音乐播放器
+
 ## 运行
 
 删除node_modules/static-container/StaticContainer.js中static PropTypes声明
